@@ -13,7 +13,7 @@ def get_orders_ids(browser: WebDriver):
     for elem in orders_ids_elems:
         a_text = elem.text.strip()
         if len(a_text) and a_text[0] == '#':
-            orders_ids.append(a_text)
+            orders_ids.append(a_text[1:])
     print(f"All orders ids: {orders_ids}")
 
     return orders_ids
