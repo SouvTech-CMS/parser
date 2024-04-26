@@ -1,9 +1,11 @@
 import json
 import time
+from datetime import datetime
 
 from etsyv3 import EtsyAPI
 
 from configs.env import ETSY_API_KEY
+from constants.access_token import AuthToken
 from constants.auth_code import AuthResponse, AUTH_RESPONSE_FILE_PATH
 from constants.etsy_oauth import etsy_auth, STATE
 
@@ -23,8 +25,13 @@ def get_etsy_api():
         return get_etsy_api()
         # raise Exception(f"Auth code is not found. Open {auth_url} to grant access.")
 
-    auth_token = etsy_auth.get_access_token()
-    print(f"Auth token: {auth_token}")
+    auth_token_response = etsy_auth.get_access_token()
+    auth_token = AuthToken(
+        access_token=auth_token_response['access_token'],
+        refresh_token=auth_token_response['refresh_token'],
+        expires_at=datetime.fromtimestamp(auth_token_response['expires_at']),
+    )
+
     if not auth_token:
         raise Exception(f"Cannot get access token.")
 
@@ -32,7 +39,7 @@ def get_etsy_api():
         keystring=ETSY_API_KEY,
         token=auth_token.access_token,
         refresh_token=auth_token.refresh_token,
-        expiry=auth_token.access_token_expiry,
+        expiry=auth_token.expires_at,
     )
 
     return etsy_api
