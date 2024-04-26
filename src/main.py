@@ -1,41 +1,26 @@
-import time
+import json
 
-from selenium.webdriver import Chrome
-from selenium.webdriver.firefox.options import Options
+from flask import Flask, request
 
-from configs.cookies import COOKIES
-from constants.urls import ETSY_URL, COMPLETED_ORDERS_URL
-from get_order_details_by_id import get_order_details_by_id
+from constants.auth_code import AUTH_RESPONSE_FILE_PATH
 
-options = Options()
-# options.add_argument("--headless")
+app = Flask(__name__)
 
-print("Starting Chrome browser...")
-browser = Chrome(options=options, keep_alive=True)
 
-browser.get(ETSY_URL)
+@app.route("/redirect", methods=['GET'])
+def redirect():
+    auth_code = request.args.get('code')
 
-for cookie in COOKIES:
-    browser.add_cookie({
-        'name': cookie['name'],
-        'value': cookie['value']
-    })
+    if not auth_code:
+        auth_code = ""
 
-browser.refresh()
+    with open(AUTH_RESPONSE_FILE_PATH, 'w') as f:
+        json.dump({
+            "auth_code": auth_code,
+        }, f)
 
-time.sleep(2)
+    return {"status": "success"}, 200
 
-browser.get(COMPLETED_ORDERS_URL)
 
-time.sleep(7)
-
-get_order_details_by_id(browser, "3279040146")
-
-# orders_ids = get_orders_ids(browser)
-#
-# for order_id in orders_ids:
-#     get_order_details_by_id(browser, order_id)
-
-print("Closing process successfuly...")
-time.sleep(2)
-browser.quit()
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=8080, debug=True)

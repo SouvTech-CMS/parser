@@ -1,4 +1,13 @@
-venv/
+# IDEA
 .idea/
 .vscode/
+
+# Python cache
+__pycache__/
+
+# Environment
 .env
+venv/
+
+# Site samples for parser
+*.html

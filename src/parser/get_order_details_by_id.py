@@ -16,12 +16,12 @@ def get_order_details_by_id(browser: WebDriver, order_id: str):
         "order-detail-container"
     )
 
+    # TODO: change classes from "class1 class2 class3" to "class1.class2.class3"
     order_status_and_data_div = order_sidebar.find_elements(
         By.CLASS_NAME,
         "mt-xs-1 show-xs show-sm"
-    )
-    print(order_status_and_data_div)
-    return
+    )[0]
+
     order_status_and_data_spans = order_status_and_data_div.find_elements(
         By.TAG_NAME,
         "span"
