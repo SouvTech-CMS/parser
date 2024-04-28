@@ -1,7 +1,9 @@
 selenium
 python-dotenv
 pydantic
-flask
 schedule
 requests
 etsyv3
+fastapi
+uvicorn[standard]
+cryptography
