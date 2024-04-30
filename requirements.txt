@@ -1,0 +1,9 @@
+selenium
+python-dotenv
+pydantic
+schedule
+requests
+etsyv3
+fastapi
+uvicorn[standard]
+cryptography
