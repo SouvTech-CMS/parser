@@ -1,0 +1,22 @@
+[
+  {
+    "parser_id": 1,
+    "shop_id": 1,
+    "shop_name": "NikoEngraving",
+    "shop_cookie": "",
+    "shop_token": "",
+    "shop_refresh_token": "",
+    "expiry": "",
+    "etsy_shop_id": ""
+  },
+  {
+    "parser_id": 2,
+    "shop_id": 2,
+    "shop_name": "AldaProduction",
+    "shop_cookie": "",
+    "shop_token": "",
+    "shop_refresh_token": "",
+    "expiry": "",
+    "etsy_shop_id": ""
+  }
+]

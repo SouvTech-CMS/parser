@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 
 
 # TODO: get orders from all pages
-def get_orders_ids(browser: WebDriver):
+def _get_orders_ids(browser: WebDriver):
     orders_ids_elems = browser.find_elements(
         By.TAG_NAME,
         "a"

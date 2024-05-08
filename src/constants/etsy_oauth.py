@@ -7,7 +7,13 @@ ETSY_OAUTH_TOKEN_URL = "https://api.etsy.com/v3/public/oauth/token"
 
 SCOPES = [
     "listings_r",
-    "transactions_r"
+    "transactions_r",
+    "billing_r",
+    "shops_r",
+    "address_r",
+    "profile_r",
+    "feedback_r",
+    "recommend_r",
 ]
 
 STATE = "superstate"
