@@ -15,6 +15,3 @@ API_URL = os.getenv('API_URL')
 API_AUTH_TOKEN = os.getenv("API_AUTH_TOKEN")
 
 DATA_FOLDER_PATH = os.getenv('DATA_FOLDER_PATH')
-
-ETSY_SHOP_ID = int(os.getenv('ETSY_SHOP_ID'))
-DB_SHOP_ID = int(os.getenv('DB_SHOP_ID'))

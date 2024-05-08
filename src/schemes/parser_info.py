@@ -3,10 +3,10 @@ from pydantic import BaseModel
 
 class Parser(BaseModel):
     id: int
-    shop_id: str
+    shop_id: int
     status: int
     command: int
     last_parsed: str
     frequency: int
     auth_cookie: str
-    token_edited: str
+    cookie_edited: str
