@@ -14,3 +14,6 @@ CODE_VERIFIER = os.getenv('CODE_VERIFIER')
 API_URL = os.getenv('API_URL')
 
 DATA_FOLDER_PATH = os.getenv('DATA_FOLDER_PATH')
+
+ETSY_SHOP_ID = int(os.getenv('ETSY_SHOP_ID'))
+DB_SHOP_ID = int(os.getenv('DB_SHOP_ID'))

@@ -10,6 +10,7 @@ from constants.auth_code import AuthCode, AUTH_CODE_RESPONSE_FILE_PATH, ACCESS_T
 from constants.etsy_oauth import etsy_auth, STATE
 
 AUTH_CODE_WAIT_TIME_IN_SECONDS = 15
+AUTH_TOKEN_LIFE_TIME_IN_SECONDS = 3600
 
 
 def _save_auth_token(auth_token: AuthToken):
@@ -57,6 +58,16 @@ def _get_auth_token() -> AuthToken:
     return auth_token
 
 
+def refresh_auth_token(etsy_api: EtsyAPI):
+    new_access_token, new_refresh_token, new_expires_at = etsy_api.refresh()
+    new_auth_token = AuthToken(
+        access_token=new_access_token,
+        refresh_token=new_refresh_token,
+        expires_at=new_expires_at.timestamp(),
+    )
+    _save_auth_token(new_auth_token)
+
+
 def get_etsy_api():
     auth_token = _get_auth_token()
 
@@ -67,4 +78,14 @@ def get_etsy_api():
         expiry=datetime.fromtimestamp(auth_token.expires_at),
     )
 
+    now_timestamp = datetime.utcnow().timestamp()
+    if now_timestamp > auth_token.expires_at:
+        refresh_auth_token(etsy_api)
+        return get_etsy_api()
+
     return etsy_api
+
+
+if __name__ == "__main__":
+    # To get auth code and token
+    print(get_etsy_api())
