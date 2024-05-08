@@ -7,11 +7,8 @@ from schemes.parser_info import Parser
 
 def get_parser_info(parser_id: int) -> Parser | None:
     data = req.get(
-        f"{API_URL}/parser",
+        f"{API_URL}/parser/{parser_id}",
         headers=authorization().model_dump(),
-        json={
-            "parser_id ": parser_id
-        }
     )
     if data.status_code == 200:
         data = data.json()
@@ -23,8 +20,23 @@ def get_parser_info(parser_id: int) -> Parser | None:
             last_parsed=data["last_parsed"],
             frequency=data["frequency"],
             auth_cookie=data["auth_cookie"],
-            token_edited=data["token_edited"]
+            cookie_edited=data["cookie_edited"]
         )
     return None
 
 
+def update_parser_command_to_default(parser_id: int):
+    data = req.put(
+        f"{API_URL}/parser",
+        headers=authorization().model_dump(),
+        json={
+            "id": parser_id,
+            "command": 0,
+        }
+    )
+    if data.status_code != 200:
+        print(f"Error with updating "
+              f"parser status to default"
+              f"Status code: {data.status_code}"
+              f"Text: {data.text}"
+              )
