@@ -1,6 +1,6 @@
 import json
 
-with open("./cookies.json") as f:
-    COOKIES = json.load(f)
+from configs.env import DATA_FOLDER_PATH
 
-print(f"Cookies: {COOKIES}")
+with open(f"{DATA_FOLDER_PATH}/cookies.json") as f:
+    COOKIES = json.load(f)

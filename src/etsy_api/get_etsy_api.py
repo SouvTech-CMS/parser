@@ -5,9 +5,10 @@ from datetime import datetime
 from etsyv3 import EtsyAPI
 
 from configs.env import ETSY_API_KEY
-from constants.access_token import AuthToken
-from constants.auth_code import AuthCode, AUTH_CODE_RESPONSE_FILE_PATH, ACCESS_TOKEN_RESPONSE_FILE_PATH
+from constants.auth_files_paths import ACCESS_TOKEN_RESPONSE_FILE_PATH, AUTH_CODE_RESPONSE_FILE_PATH
 from constants.etsy_oauth import etsy_auth, STATE
+from schemes.access_token import AuthToken
+from schemes.auth_code import AuthCode
 
 AUTH_CODE_WAIT_TIME_IN_SECONDS = 15
 AUTH_TOKEN_LIFE_TIME_IN_SECONDS = 3600
@@ -15,7 +16,6 @@ AUTH_TOKEN_LIFE_TIME_IN_SECONDS = 3600
 
 def _save_auth_token(auth_token: AuthToken):
     with open(ACCESS_TOKEN_RESPONSE_FILE_PATH, 'w') as f:
-        # auth_token_data = auth_token.model_dump()
         json.dump(auth_token.model_dump(), f)
 
 
@@ -84,8 +84,3 @@ def get_etsy_api():
         return get_etsy_api()
 
     return etsy_api
-
-
-if __name__ == "__main__":
-    # To get auth code and token
-    print(get_etsy_api())
