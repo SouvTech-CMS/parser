@@ -6,6 +6,41 @@ from selenium.webdriver.common.by import By
 from constants.urls import COMPLETED_ORDERS_URL
 
 
+def open_order_page_by_id(browser: WebDriver, order_id: str):
+    time.sleep(5)
+    browser.get(f"{COMPLETED_ORDERS_URL}?search_query={order_id}&order_id={order_id}")
+    time.sleep(5)
+    return browser
+
+
+def get_order_shipping(browser: WebDriver):
+    order_sidebar = browser.find_element(
+        By.ID,
+        "order-detail-container"
+    )
+
+    shipping_div = order_sidebar.find_element(
+        By.CLASS_NAME,
+        "wt-display-inline-flex-md.wt-display-inline-block"
+    )
+    # Total order shipping
+    order_shipping = float(shipping_div.text[1:])
+    return order_shipping
+
+
+def is_order_purchased_after_ad(browser: WebDriver):
+    order_sidebar = browser.find_element(
+        By.ID,
+        "order-detail-container"
+    )
+
+    purchased_after_ad_icon = order_sidebar.find_elements(
+        By.CLASS_NAME,
+        "etsy-icon.icon-smaller.icon-b-4"
+    )
+    is_purchased_after_ad = len(purchased_after_ad_icon) == 1
+    return is_purchased_after_ad
+
 # def get_order_details_by_id(browser: WebDriver, order_id: str):
 #     time.sleep(5)
 #     browser.get(f"{COMPLETED_ORDERS_URL}?order_id={order_id}")
@@ -84,27 +119,3 @@ from constants.urls import COMPLETED_ORDERS_URL
 #     print(f"12124:{order_shipping}")
 #     print(f"12124:{order_tax}")
 #     print(f"12124:{order_total_amount}")
-
-def get_order_shipping_by_id(browser: WebDriver, order_id: str):
-    time.sleep(5)
-    browser.get(f"{COMPLETED_ORDERS_URL}?search_query={order_id}&order_id={order_id}")
-    time.sleep(5)
-
-    order_sidebar = browser.find_element(
-        By.ID,
-        "order-detail-container"
-    )
-    print(order_sidebar)
-
-    shipping_div = order_sidebar.find_element(
-        By.CLASS_NAME,
-        "wt-display-inline-flex-md.wt-display-inline-block"
-    )
-    print(shipping_div)
-    # Total order shipping
-    order_shipping = float(shipping_div.text[1:])
-
-    print(f"order_id: {order_id}")
-    print(f"order_shipping: {order_shipping}")
-
-    return order_shipping
