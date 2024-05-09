@@ -24,7 +24,7 @@ def format_order_data(order: dict, shop_id: int):
 
     order = Order(
         shop_id=shop_id,
-        order_id=order_id,
+        order_id=str(order_id),
         date=formated_date,
         quantity=quantity,
         buyer_paid=buyer_paid,

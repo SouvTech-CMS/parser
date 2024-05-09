@@ -16,7 +16,7 @@ if __name__ == "__main__":
     browser = get_browser()
 
     for shop in shops_data:
-        browser = update_browser_shop_cookies(browser)
+        browser = update_browser_shop_cookies(browser, shop.shop_cookie)
 
         update_parser_status_by_id(
             parser_id=shop.parser_id,
@@ -33,7 +33,7 @@ if __name__ == "__main__":
             continue
 
         # Get last 100 orders with etsy api
-        shop_orders = get_all_orders_by_shop_id(shop.etsy_shop_id)
+        shop_orders = get_all_orders_by_shop_id(int(shop.etsy_shop_id), shop.shop_id)
         orders_create: list[Order] = []
         orders_update: list[Order] = []
         # Get order details and split for creating and updating
@@ -47,13 +47,8 @@ if __name__ == "__main__":
             # Get order shipping and purchased after ad with selenium
             if existed_order_id is None:
                 browser = open_order_page_by_id(browser, order.order_id)
-
-                order_shipping = get_order_shipping(browser)
-                order.shipping = order_shipping
-
-                order_purchased_after_ad = is_order_purchased_after_ad(browser)
-                order.purchased_after_ad = order_purchased_after_ad
-
+                order.shipping = get_order_shipping(browser)
+                order.purchased_after_ad = is_order_purchased_after_ad(browser)
                 orders_create.append(order)
                 continue
 

@@ -78,9 +78,6 @@ def _get_auth_token(shop_id: int) -> AuthToken:
 
 def refresh_auth_token(etsy_api: EtsyAPI, shop_id: int):
     new_access_token, new_refresh_token, new_expires_at = etsy_api.refresh()
-    print(f"new_access_token: {new_access_token}")
-    print(f"new_refresh_token: {new_refresh_token}")
-    print(f"new_expires_at: {new_expires_at}")
     new_auth_token = AuthToken(
         access_token=new_access_token,
         refresh_token=new_refresh_token,
@@ -105,6 +102,3 @@ def get_etsy_api(shop_id: int):
         return get_etsy_api(shop_id)
 
     return etsy_api
-
-
-get_etsy_api(1)

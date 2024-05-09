@@ -3,22 +3,22 @@
     "parser_id": 1,
     "shop_id": 1,
     "shop_name": "NikoEngraving",
-    "shop_cookie": "",
-    "shop_token": "",
-    "shop_refresh_token": "",
-    "expiry": 0,
-    "etsy_shop_id": "",
-    "shop_auth_code": ""
+    "shop_cookie": "902020492-1262971206570-8aeb4dc8c2194f56ddeda9b0c278c6ba5ea4f85f972048f700f78923|1717821053",
+    "shop_token": "902020492.mzJcDwmq4fPU42atHi8_WoM7pD2wGiUFmJvg_RbikcY2Cgy16E_9vQ7AcEjtKgYXPTNT2zXFJ6MsFJIZg4_1NwuRxD",
+    "shop_refresh_token": "902020492.LHmFbieGg0GWLymi-GFZ6MC9xn8Iap25h8pxUQdPLv9g7vTbH8jxm9X8z2lhKVHIv8eiEDZf9yewuXrnrIm0FRWUea",
+    "expiry": 1715294659.8736916,
+    "etsy_shop_id": "50508356",
+    "shop_auth_code": "xaMn5GP6EN1o8fK80SPHN0pxTwFH8b7XuFxuKcAFQqh22kkr2o9kHFpy5QUI8vtdqGjMsuJyvrDD4GhR_jK-0miMIHKezHBqfVMr"
   },
   {
     "parser_id": 2,
     "shop_id": 2,
     "shop_name": "AldaProduction",
-    "shop_cookie": "",
-    "shop_token": "",
-    "shop_refresh_token": "",
-    "expiry": 0.0,
-    "etsy_shop_id": "",
-    "shop_auth_code": ""
+    "shop_cookie": "647461166-1263175038990-959fc01d5721343bbcd000d36df5000a2a36eb4540d4be0076c8ac92|1717883147",
+    "shop_token": "647461166.DjzB_uVCkx3p4T-8j2axHlwzNWYyXtxjN0lVDTz5sowRc9YjBiRI-TRK5bRiYF-j0OznTusMmYt68eKBHVOAXbMqfg",
+    "shop_refresh_token": "647461166.vV4XHWtQevEJ1XzJNfHHDsC6kzfSb7Q9ADtHR3UUMOABb1PajVu74bk0azgq1t37EqXCKnP4t8nkL5aOTsJatAySt7",
+    "expiry": 1715294773.4046519,
+    "etsy_shop_id": "36073575",
+    "shop_auth_code": "QWZ19PHyhfwSy0QE1_c8cGxiMwIprCO7mBe1qMVTGK1DTgKqPWX4FE1hw6Qpk0sYLt06gL7RBDgrf9rK8ZnMCBD1IMpYP9XqYeGB"
   }
 ]

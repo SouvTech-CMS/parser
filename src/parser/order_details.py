@@ -1,5 +1,6 @@
 import time
 
+from selenium.common import NoSuchElementException
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
 
@@ -19,13 +20,17 @@ def get_order_shipping(browser: WebDriver):
         "order-detail-container"
     )
 
-    shipping_div = order_sidebar.find_element(
-        By.CLASS_NAME,
-        "wt-display-inline-flex-md.wt-display-inline-block"
-    )
-    # Total order shipping
-    order_shipping = float(shipping_div.text[1:])
-    return order_shipping
+    try:
+        shipping_div = order_sidebar.find_element(
+            By.CLASS_NAME,
+            "wt-display-inline-flex-md.wt-display-inline-block"
+        )
+        # Total order shipping
+        order_shipping = float(shipping_div.text[1:])
+        return order_shipping
+    # If order without shipping data
+    except NoSuchElementException:
+        return 0
 
 
 def is_order_purchased_after_ad(browser: WebDriver):
