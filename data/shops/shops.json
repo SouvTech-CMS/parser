@@ -6,8 +6,9 @@
     "shop_cookie": "",
     "shop_token": "",
     "shop_refresh_token": "",
-    "expiry": "",
-    "etsy_shop_id": ""
+    "expiry": 0,
+    "etsy_shop_id": "",
+    "shop_auth_code": ""
   },
   {
     "parser_id": 2,
@@ -16,7 +17,8 @@
     "shop_cookie": "",
     "shop_token": "",
     "shop_refresh_token": "",
-    "expiry": "",
-    "etsy_shop_id": ""
+    "expiry": 0.0,
+    "etsy_shop_id": "",
+    "shop_auth_code": ""
   }
 ]
