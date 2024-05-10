@@ -1,5 +1,6 @@
 import time
 
+from loguru import logger as log
 from selenium.common import NoSuchElementException
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.common.by import By
@@ -8,12 +9,12 @@ from constants.urls import COMPLETED_ORDERS_URL
 
 
 def open_order_page_by_id(browser: WebDriver, order_id: str):
-    time.sleep(5)
     browser.get(f"{COMPLETED_ORDERS_URL}?search_query={order_id}&order_id={order_id}")
-    time.sleep(5)
+    time.sleep(7)
     return browser
 
 
+@log.catch(level="CRITICAL")
 def get_order_shipping(browser: WebDriver):
     order_sidebar = browser.find_element(
         By.ID,
@@ -33,6 +34,7 @@ def get_order_shipping(browser: WebDriver):
         return 0
 
 
+@log.catch(level="CRITICAL")
 def is_order_purchased_after_ad(browser: WebDriver):
     order_sidebar = browser.find_element(
         By.ID,
@@ -46,6 +48,13 @@ def is_order_purchased_after_ad(browser: WebDriver):
     is_purchased_after_ad = len(purchased_after_ad_icon) == 1
     return is_purchased_after_ad
 
+# if __name__ == "__main__":
+#     browser = get_browser()
+#     browser = update_browser_shop_cookies(browser,
+#                                           "902020492-1262971206570-8aeb4dc8c2194f56ddeda9b0c278c6ba5ea4f85f972048f700f78923|1717821053")
+#     browser = open_order_page_by_id(browser, "3297381056")
+#     print(get_order_shipping(browser))
+
 # def get_order_details_by_id(browser: WebDriver, order_id: str):
 #     time.sleep(5)
 #     browser.get(f"{COMPLETED_ORDERS_URL}?order_id={order_id}")
@@ -56,7 +65,6 @@ def is_order_purchased_after_ad(browser: WebDriver):
 #         "order-detail-container"
 #     )
 #
-#     # TODO: change classes from "class1 class2 class3" to "class1.class2.class3"
 #     order_status_and_data_div = order_sidebar.find_elements(
 #         By.CLASS_NAME,
 #         "mt-xs-1 show-xs show-sm"
