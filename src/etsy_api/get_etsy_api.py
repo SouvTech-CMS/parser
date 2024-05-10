@@ -3,6 +3,8 @@ import time
 from datetime import datetime
 
 from etsyv3 import EtsyAPI
+from etsyv3.etsy_api import Unauthorised
+from loguru import logger as log
 
 from configs.env import ETSY_API_KEY
 from constants.etsy_oauth import etsy_auth, STATE
@@ -78,6 +80,9 @@ def _get_auth_token(shop_id: int) -> AuthToken:
 
 def refresh_auth_token(etsy_api: EtsyAPI, shop_id: int):
     new_access_token, new_refresh_token, new_expires_at = etsy_api.refresh()
+    log.success(f"New access token: {new_access_token}")
+    log.success(f"New refresh token: {new_refresh_token}")
+    log.success(f"New expiry: {new_expires_at}")
     new_auth_token = AuthToken(
         access_token=new_access_token,
         refresh_token=new_refresh_token,
@@ -96,8 +101,10 @@ def get_etsy_api(shop_id: int):
         expiry=datetime.fromtimestamp(auth_token.expires_at),
     )
 
-    now_timestamp = datetime.utcnow().timestamp()
-    if now_timestamp > auth_token.expires_at:
+    try:
+        etsy_api.ping()
+    except Unauthorised:
+        log.warning(f"Token is expired. Requesting new token.")
         refresh_auth_token(etsy_api, shop_id)
         return get_etsy_api(shop_id)
 

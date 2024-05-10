@@ -15,3 +15,4 @@ API_URL = os.getenv('API_URL')
 API_AUTH_TOKEN = os.getenv("API_AUTH_TOKEN")
 
 DATA_FOLDER_PATH = os.getenv('DATA_FOLDER_PATH')
+LOG_FILE = os.getenv("LOG_FILE")

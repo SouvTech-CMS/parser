@@ -9,7 +9,7 @@ def create_order(order: Order):
     response = req.post(
         f"{API_URL}/order/",
         headers=authorization().model_dump(),
-        json=order,
+        json=order.model_dump(),
     )
     if response.status_code != 200:
         print(f"""
