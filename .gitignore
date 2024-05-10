@@ -11,3 +11,4 @@ venv/
 
 # Site samples for parser
 *.html
+/data/logs.json
