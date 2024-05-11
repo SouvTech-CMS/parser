@@ -4,6 +4,7 @@ from loguru import logger as log
 
 from api.check_order_in_db import check_order_in_db
 from api.create_order import create_order
+from api.good_in_order import create_good_in_order, good_in_order_by_order_id, update_good_in_order
 from api.update_order import update_order
 from api.update_parser_status_by_id import update_parser_status_by_id
 from configs.env import LOG_FILE
@@ -25,7 +26,7 @@ log.add(
     serialize=True
 )
 
-# Every 15 mins
+# Every 15 minutes
 PARSER_WAIT_TIME_IN_SECONDS = 60 * 15
 
 if __name__ == "__main__":
@@ -55,7 +56,12 @@ if __name__ == "__main__":
 
         # Get last 100 orders with etsy api
         log.info(f"Fetching 100 orders from shop {shop.shop_name}...")
-        shop_orders, orders_count = get_all_orders_by_shop_id(int(shop.etsy_shop_id), shop.shop_id)
+        shop_orders, orders_count = get_all_orders_by_shop_id(
+            etsy_shop_id=int(shop.etsy_shop_id),
+            shop_id=shop.shop_id,
+            limit=20,
+            offset=0,
+        )
         log.success(f"Shop orders fetched.")
 
         orders_create: list[Order] = []
@@ -66,13 +72,13 @@ if __name__ == "__main__":
             ######
             start_time_order = datetime.now()
             ######
-            order = format_order_data(
+
+            log.info(f"Check if order with id {shop_order['receipt_id']} exists...")
+            existed_order_id = check_order_in_db(str(shop_order['receipt_id']))
+            order, goods_in_order = format_order_data(
                 order=shop_order,
                 shop_id=shop.shop_id,
             )
-            log.info(f"Check if order with id {order.order_id} exists...")
-            existed_order_id = check_order_in_db(order.order_id)
-
             # Get order shipping and purchased after ad with selenium
             # TODO: fetch shipping of all orders with status like "Completed"
             if existed_order_id is None:
@@ -85,30 +91,51 @@ if __name__ == "__main__":
 
                 log.info(f"Fetching order purchased after ad (order: {order.order_id})...")
                 order.purchased_after_ad = is_order_purchased_after_ad(browser)
-                orders_create.append(order)
                 log.success(f"Order purchased after ad fetched: {order.purchased_after_ad}")
+                log.info(f"Creating parsed order...")
+                new_order = create_order(order)
+                if new_order:
+                    log.success(f"Order created.")
+                    log.info(f"Creating order goods")
+                    good_in_order_shipping = new_order.shipping / new_order.quantity
+                    good_in_order_tax = new_order.tax / new_order.quantity
+                    for good_in_order in goods_in_order:
+                        good_in_order.amount = good_in_order.amount - good_in_order_shipping - good_in_order_tax
+                        good = create_good_in_order(good_in_order)
+                        if good:
+                            log.success(
+                                f"Successfully added good in order with order_id {good.order_id}, good_id {good.good_id}, amount {good.amount}, quantity {good.quantity}")
+                        else:
+                            log.error(
+                                f"Couldn't add good in order with order_id {good_in_order.order_id}, good_id "
+                                f"{good_in_order.good_id}, amount {good_in_order.amount}, "
+                                f"quantity {good_in_order.quantity}")
+
+                else:
+                    log.error(f"Couldn't create order with id {order.order_id}")
             else:
                 order.id = existed_order_id
                 log.info(f"Order with id {order.order_id} is exists.")
-                orders_update.append(order)
+                log.info(f"Updating existed order...")
+                update_order(order)
+                log.success(f"Order updated.")
+                log.info("Getting good in orders from db for comparison")
+                goods_in_order_from_db = good_in_order_by_order_id(order.id)
+                for good_in_order_from_db in goods_in_order_from_db:
+                    for good_in_order in goods_in_order:
+                        if (good_in_order_from_db.good_id == good_in_order.good_id
+                                and good_in_order_from_db.amount != good_in_order.amount):
+                            log.info(f"Differences found updating good in order")
+                            good_in_order_from_db.amount = good_in_order.amount
+                            _ = update_good_in_order(good_in_order_from_db)
+                            if _:
+                                log.success(f"Updated good in order")
             ######
             end_time_order = datetime.now()
             log.critical(f"Order parsing time: {end_time_order - start_time_order}")
             ######
 
         log.success(f"Additional orders info fetched.")
-
-        # Create order in db
-        log.info(f"Creating parsed orders...")
-        for new_order in orders_create:
-            create_order(new_order)
-        log.success(f"Orders created.")
-
-        # Update order in db
-        log.info(f"Updating existed orders...")
-        for updated_order in orders_update:
-            update_order(updated_order)
-        log.success(f"Orders updated.")
 
         log.info(f"Updating parser {shop.parser_id} status to {ParserStatus.OK_AND_WAIT}...")
         update_parser_status_by_id(

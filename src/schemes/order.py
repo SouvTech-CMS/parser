@@ -11,3 +11,4 @@ class Order(BaseModel):
     tax: float
     shipping: float | None = None
     purchased_after_ad: bool | None = None
+    profit: float | None = None
