@@ -1,3 +1,6 @@
+import time
+
+from loguru import logger as log
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.webdriver import WebDriver
@@ -10,9 +13,10 @@ def get_browser():
     options = Options()
     # options.add_argument("--headless")
 
-    print("Starting Chrome browser...")
+    log.info("Starting Chrome browser...")
     browser = Chrome(options=options, keep_alive=True)
     browser.get(ETSY_URL)
+    time.sleep(5)
     return browser
 
 

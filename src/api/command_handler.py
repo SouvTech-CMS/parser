@@ -1,4 +1,5 @@
 import requests as req
+from loguru import logger as log
 
 from api.auth import authorization
 from configs.env import API_URL
@@ -27,7 +28,7 @@ def get_parser_info(parser_id: int) -> Parser | None:
 
 def update_parser_command_to_default(parser_id: int):
     data = req.put(
-        f"{API_URL}/parser",
+        f"{API_URL}/parser/",
         headers=authorization().model_dump(),
         json={
             "id": parser_id,
@@ -35,8 +36,8 @@ def update_parser_command_to_default(parser_id: int):
         }
     )
     if data.status_code != 200:
-        print(f"Error with updating "
-              f"parser status to default"
-              f"Status code: {data.status_code}"
-              f"Text: {data.text}"
-              )
+        log.error(f"Error with updating "
+                  f"parser status to default"
+                  f"Status code: {data.status_code}"
+                  f"Text: {data.text}"
+                  )

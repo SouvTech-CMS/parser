@@ -1,4 +1,5 @@
 import requests as req
+from loguru import logger as log
 
 from api.auth import authorization
 from configs.env import API_URL
@@ -15,7 +16,7 @@ def update_parser_status_by_id(parser_id: int, status: int):
     )
 
     if response.status_code != 200:
-        print(f"""
+        log.error(f"""
             Some error when updating parser status.
             Parser ID: {parser_id}
             Status code: {response.status_code}
