@@ -7,10 +7,14 @@ from schemes.parser_info import Parser
 
 
 def get_parser_info(parser_id: int) -> Parser | None:
-    data = req.get(
-        f"{API_URL}/parser/{parser_id}",
-        headers=authorization().model_dump(),
-    )
+    try:
+        data = req.get(
+            f"{API_URL}/parser/{parser_id}",
+            headers=authorization().model_dump(),
+        )
+    except ConnectionError:
+        return get_parser_info(parser_id)
+
     if data.status_code == 200:
         data = data.json()
         return Parser(
@@ -27,14 +31,17 @@ def get_parser_info(parser_id: int) -> Parser | None:
 
 
 def update_parser_command_to_default(parser_id: int):
-    data = req.put(
-        f"{API_URL}/parser/",
-        headers=authorization().model_dump(),
-        json={
-            "id": parser_id,
-            "command": 0,
-        }
-    )
+    try:
+        data = req.put(
+            f"{API_URL}/parser/",
+            headers=authorization().model_dump(),
+            json={
+                "id": parser_id,
+                "command": 0,
+            }
+        )
+    except ConnectionError:
+        return update_parser_command_to_default(parser_id)
     if data.status_code != 200:
         log.error(f"Error with updating "
                   f"parser status to default"

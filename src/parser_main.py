@@ -4,6 +4,7 @@ from loguru import logger as log
 
 from api.check_order_in_db import check_order_in_db
 from api.create_order import create_order
+from api.fees import get_fees
 from api.good_in_order import create_good_in_order, good_in_order_by_order_id, update_good_in_order
 from api.update_order import update_order
 from api.update_parser_status_by_id import update_parser_status_by_id
@@ -69,6 +70,8 @@ if __name__ == "__main__":
         # Get order details and split for creating and updating
         log.info(f"Fetching orders additional info...")
         for shop_order in shop_orders:
+            # Getting fees for shop
+            fees = get_fees(shop.shop_id)
             ######
             start_time_order = datetime.now()
             ######
@@ -99,7 +102,19 @@ if __name__ == "__main__":
                     log.info(f"Creating order goods")
                     good_in_order_shipping = new_order.shipping / new_order.quantity
                     good_in_order_tax = new_order.tax / new_order.quantity
+                    fee_for_item = 0
+                    # Generating full fee for order
+                    if new_order.shipping != 0 and new_order.shipping is not None:
+                        payment_tax = eval(str(new_order.buyer_paid) + fees.payment_processing_fee)
+                        item_value = new_order.buyer_paid - new_order.tax - new_order.shipping
+                        transaction_item = eval(str(item_value) + fees.transaction_item)
+                        shipping_transaction = eval(str(new_order.shipping) + fees.transaction_shipping)
+                        pack = fees.pack
+                        re_listing = fees.re_listing
+                        full_fee = re_listing + pack + shipping_transaction + transaction_item + payment_tax + order.tax + order.shipping
+                        fee_for_item = full_fee / new_order.quantity
                     for good_in_order in goods_in_order:
+                        good_in_order.order_id = new_order.id
                         good_in_order.amount = good_in_order.amount - good_in_order_shipping - good_in_order_tax
                         good = create_good_in_order(good_in_order)
                         if good:
@@ -121,6 +136,7 @@ if __name__ == "__main__":
                 log.success(f"Order updated.")
                 log.info("Getting good in orders from db for comparison")
                 goods_in_order_from_db = good_in_order_by_order_id(order.id)
+
                 for good_in_order_from_db in goods_in_order_from_db:
                     for good_in_order in goods_in_order:
                         if (good_in_order_from_db.good_id == good_in_order.good_id

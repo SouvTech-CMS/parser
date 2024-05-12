@@ -7,10 +7,13 @@ from schemes.order_item import Good, GoodCreate
 
 
 def check_good_in_base(product_id: str) -> Good | None:
-    response = req.get(
-        f"{API_URL}/good/by_product_id/{product_id}",
-        headers=authorization().model_dump(),
-    )
+    try:
+        response = req.get(
+            f"{API_URL}/good/by_product_id/{product_id}",
+            headers=authorization().model_dump(),
+        )
+    except ConnectionError:
+        return check_good_in_base(product_id)
     if response.status_code != 200:
         return None
     data = response.json()
@@ -26,11 +29,15 @@ def check_good_in_base(product_id: str) -> Good | None:
 
 
 def good_create(good: GoodCreate) -> Good | None:
-    response = req.post(
-        f"{API_URL}/good",
-        headers=authorization().model_dump(),
-        json=good.model_dump()
-    )
+    try:
+
+        response = req.post(
+            f"{API_URL}/good",
+            headers=authorization().model_dump(),
+            json=good.model_dump()
+        )
+    except ConnectionError:
+        return good_create(good)
     if response.status_code == 200:
         data = response.json()
         return Good(
