@@ -6,15 +6,17 @@ from configs.env import API_URL
 
 
 def update_parser_status_by_id(parser_id: int, status: int):
-    response = req.put(
-        f"{API_URL}/parser/",
-        headers=authorization().model_dump(),
-        json={
-            "id": parser_id,
-            "status": status,
-        }
-    )
-
+    try:
+        response = req.put(
+            f"{API_URL}/parser/",
+            headers=authorization().model_dump(),
+            json={
+                "id": parser_id,
+                "status": status,
+            }
+        )
+    except ConnectionError:
+        return update_parser_status_by_id(parser_id, status)
     if response.status_code != 200:
         log.error(f"""
             Some error when updating parser status.

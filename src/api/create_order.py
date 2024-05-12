@@ -7,11 +7,14 @@ from schemes.order import Order
 
 
 def create_order(order: Order) -> Order | None:
-    response = req.post(
-        f"{API_URL}/order/",
-        headers=authorization().model_dump(),
-        json=order.model_dump(),
-    )
+    try:
+        response = req.post(
+            f"{API_URL}/order/",
+            headers=authorization().model_dump(),
+            json=order.model_dump(),
+        )
+    except ConnectionError:
+        return create_order(order)
     if response.status_code != 200:
         log.error(f"""
             Some error when creating order.

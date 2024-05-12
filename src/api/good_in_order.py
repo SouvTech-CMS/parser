@@ -6,11 +6,14 @@ from schemes.order_item import GoodInOrder, GoodInOrderCreate
 
 
 def good_in_order_by_order_id(order_id: int):
-    list_of_goods_in_order = []
-    response = req.get(
-        f"{API_URL}/good_in_order/by_order_id/{order_id}",
-        headers=authorization().model_dump(),
-    )
+    try:
+        list_of_goods_in_order = []
+        response = req.get(
+            f"{API_URL}/good_in_order/by_order_id/{order_id}",
+            headers=authorization().model_dump(),
+        )
+    except ConnectionError:
+        return good_in_order_by_order_id(order_id)
     if response.status_code == 200:
         data = response.json()
         for good_in_order in data:
@@ -28,11 +31,14 @@ def good_in_order_by_order_id(order_id: int):
 
 
 def create_good_in_order(good: GoodInOrderCreate) -> GoodInOrder | None:
-    response = req.post(
-        f"{API_URL}/good_in_order/",
-        headers=authorization().model_dump(),
-        json=good.model_dump()
-    )
+    try:
+        response = req.post(
+            f"{API_URL}/good_in_order/",
+            headers=authorization().model_dump(),
+            json=good.model_dump()
+        )
+    except ConnectionError:
+        return create_good_in_order(good)
     if response.status_code == 200:
         data = response.json()
         return GoodInOrder(
@@ -46,11 +52,14 @@ def create_good_in_order(good: GoodInOrderCreate) -> GoodInOrder | None:
 
 
 def update_good_in_order(good: GoodInOrder) -> GoodInOrder | None:
-    response = req.put(
-        f"{API_URL}/good_in_order",
-        headers=authorization().model_dump(),
-        json=good.model_dump()
-    )
+    try:
+        response = req.put(
+            f"{API_URL}/good_in_order",
+            headers=authorization().model_dump(),
+            json=good.model_dump()
+        )
+    except ConnectionError:
+        return update_good_in_order(good)
     if response.status_code == 200:
         data = response.json()
         return GoodInOrder(

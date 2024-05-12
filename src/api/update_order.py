@@ -7,11 +7,14 @@ from schemes.order import Order
 
 
 def update_order(order: Order):
-    response = req.put(
-        f"{API_URL}/order/",
-        headers=authorization().model_dump(),
-        json=order.model_dump(),
-    )
+    try:
+        response = req.put(
+            f"{API_URL}/order/",
+            headers=authorization().model_dump(),
+            json=order.model_dump(),
+        )
+    except ConnectionError:
+        return update_order(order)
     if response.status_code != 200:
         log.error(f"""
             Some error when creating order.
