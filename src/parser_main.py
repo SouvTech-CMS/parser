@@ -116,13 +116,15 @@ if __name__ == "__main__":
                 else:
                     log.error(f"Couldn't create order with id {order.order_id}")
             else:
-                order.id = existed_order.id
-                order.purchased_after_ad = existed_order.purchased_after_ad
-                # order.shipping=
-                log.info(f"Order with id {order.order_id} is exists.")
-                log.info(f"Updating existed order...")
-                new_order = update_order(order)
-                log.success(f"Order updated.")
+                # Updating shipping
+                log.info(f"Order with id {existed_order.order_id} is exists.")
+                if not existed_order.shipping:
+                    log.info(f"Updating existed order shipping...")
+                    browser = open_order_page_by_id(browser, existed_order.order_id)
+                    existed_order.shipping = get_order_shipping(browser)
+                    if existed_order:
+                        new_order = update_order(order)
+                        log.success(f"Order shipping updated.")
             ######
             end_time_order = datetime.now()
             log.critical(f"Order parsing time: {end_time_order - start_time_order}")
