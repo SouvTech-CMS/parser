@@ -13,9 +13,7 @@ def check_good_in_base(product_id: str) -> Good | None:
             f"{API_URL}/good/by_product_id/{product_id}",
             headers=authorization().model_dump(),
         )
-    except ConnectionError:
-        return check_good_in_base(product_id)
-    except ReadTimeout:
+    except Exception:
         return check_good_in_base(product_id)
     if response.status_code != 200:
         return None

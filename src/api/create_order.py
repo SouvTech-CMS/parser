@@ -14,9 +14,7 @@ def create_order(order: Order) -> Order | None:
             headers=authorization().model_dump(),
             json=order.model_dump(),
         )
-    except ConnectionError:
-        return create_order(order)
-    except ReadTimeout:
+    except Exception:
         return create_order(order)
 
     if response.status_code != 200:

@@ -12,7 +12,7 @@ def get_fees(shop_id: int) -> Fees | None:
             f"{API_URL}/fees_and_expenses/{shop_id}",
             headers=authorization().model_dump(),
         )
-    except ConnectionError:
+    except Exception:
         return get_fees(shop_id)
     if response.status_code == 200:
         data = response.json()

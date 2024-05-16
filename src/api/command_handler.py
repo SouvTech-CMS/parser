@@ -13,7 +13,7 @@ def get_parser_info(parser_id: int) -> Parser | None:
             f"{API_URL}/parser/{parser_id}",
             headers=authorization().model_dump(),
         )
-    except ConnectionError:
+    except Exception:
         return get_parser_info(parser_id)
 
     if data.status_code == 200:

@@ -12,7 +12,7 @@ def check_order_in_db(order_in_shop_id: str) -> Order | None:
             f"{API_URL}/order/in_shop_id/{order_in_shop_id}",
             headers=authorization().model_dump(),
         )
-    except ConnectionError:
+    except Exception:
         return check_order_in_db(order_in_shop_id)
     if response.status_code == 200:
         order_data = response.json()

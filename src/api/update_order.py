@@ -14,7 +14,7 @@ def update_order(order: Order | OrderUpdate):
             headers=authorization().model_dump(),
             json=order.model_dump(),
         )
-    except ConnectionError:
+    except Exception:
         return update_order(order)
     if response.status_code != 200:
         log.error(f"""

@@ -16,7 +16,7 @@ def update_parser_status_by_id(parser_id: int, status: int):
                 "status": status,
             }
         )
-    except ConnectionError:
+    except Exception:
         return update_parser_status_by_id(parser_id, status)
     if response.status_code != 200:
         log.error(f"""

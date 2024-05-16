@@ -14,7 +14,7 @@ def good_in_order_by_order_id(order_id: int):
             f"{API_URL}/good_in_order/by_order_id/{order_id}",
             headers=authorization().model_dump(),
         )
-    except ConnectionError:
+    except Exception:
         time.sleep(1)
         return good_in_order_by_order_id(order_id)
     if response.status_code == 200:
