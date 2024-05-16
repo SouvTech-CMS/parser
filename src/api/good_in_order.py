@@ -1,18 +1,21 @@
-import requests as req
+import time
 
+import requests as req
+from requests.exceptions import ConnectionError
 from api.auth import authorization
 from configs.env import API_URL
 from schemes.order_item import GoodInOrder, GoodInOrderCreate
 
 
 def good_in_order_by_order_id(order_id: int):
+    list_of_goods_in_order = []
     try:
-        list_of_goods_in_order = []
         response = req.get(
             f"{API_URL}/good_in_order/by_order_id/{order_id}",
             headers=authorization().model_dump(),
         )
     except ConnectionError:
+        time.sleep(1)
         return good_in_order_by_order_id(order_id)
     if response.status_code == 200:
         data = response.json()

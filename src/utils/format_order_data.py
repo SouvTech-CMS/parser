@@ -53,9 +53,7 @@ def format_order_data(order: dict, shop_id: int, ):
 
         # Amount of item
         price = trans['price']['amount'] / trans['price']['divisor']
-        log.info(f"Good In Order price {price}")
         amount = price - trans['buyer_coupon']
-        log.info(f"Good In Order price {amount}")
         #################
 
         order_items.append(
