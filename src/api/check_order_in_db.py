@@ -18,7 +18,8 @@ def check_order_in_db(order_in_shop_id: str) -> Order | None:
         order_data = response.json()
         return Order(
             id=order_data['id'],
-            purchased_after_ad=order_data['purchased_after_ad']
+            purchased_after_ad=order_data['purchased_after_ad'],
+            shipping=order_data['shipping'],
         )
 
     return None

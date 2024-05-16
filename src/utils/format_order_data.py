@@ -52,7 +52,7 @@ def format_order_data(order: dict, shop_id: int, ):
                 continue
 
         # Amount of item
-        price = trans['price']['amount'] / trans['price']['divisor']
+        price = (trans['price']['amount'] / trans['price']['divisor']) * trans['quantity']
         amount = price - trans['buyer_coupon']
         #################
 

@@ -6,7 +6,7 @@ from loguru import logger as log
 from api.check_order_in_db import check_order_in_db
 from api.create_order import create_order
 from api.fees import get_fees
-from api.good_in_order import create_good_in_order, good_in_order_by_order_id, update_good_in_order
+from api.good_in_order import create_good_in_order
 from api.update_order import update_order
 from api.update_parser_status_by_id import update_parser_status_by_id
 from configs.env import LOG_FILE
@@ -61,12 +61,9 @@ if __name__ == "__main__":
         shop_orders, orders_count = get_all_orders_by_shop_id(
             etsy_shop_id=int(shop.etsy_shop_id),
             shop_id=shop.shop_id,
-            limit=20,
-            offset=50,
+            limit=100,
+            offset=0,
         )
-        with open("orders.json", "w") as f:
-            json.dump(shop_orders, f)
-        log.success(f"Shop orders fetched.")
 
         orders_create: list[Order] = []
         orders_update: list[Order] = []
@@ -87,7 +84,7 @@ if __name__ == "__main__":
             )
             # Get order shipping and purchased after ad with selenium
             # TODO: fetch shipping of all orders with status like "Completed"
-            if existed_order.id is None:
+            if existed_order is None:
                 log.info(f"Order with id {order.order_id} is not exists.")
 
                 log.info(f"Fetching order shipping (order: {order.order_id})...")
