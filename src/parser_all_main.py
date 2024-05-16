@@ -37,6 +37,8 @@ if __name__ == "__main__":
     browser = get_browser()
 
     for shop in shops_data:
+        if shop.shop_id == 1:
+            continue
         start_time_shop = datetime.now()
         log.info(f"Parsing shop {shop.shop_id} - {shop.shop_name}...")
         browser = update_browser_shop_cookies(browser, shop.shop_cookie)
