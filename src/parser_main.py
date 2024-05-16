@@ -15,7 +15,7 @@ from etsy_api.orders import get_all_orders_by_shop_id
 from parser.browser import get_browser, update_browser_shop_cookies
 from parser.check_auth_cookie import check_auth_cookie
 from parser.order_details import open_order_page_by_id, get_order_shipping, is_order_purchased_after_ad
-from schemes.order import Order
+from schemes.order import Order, OrderUpdate
 from utils.format_order_data import format_order_data
 from utils.parser_shops_data import get_parser_shops_data
 
@@ -118,16 +118,26 @@ if __name__ == "__main__":
             else:
                 # Updating shipping
                 log.info(f"Order with id {existed_order.order_id} is exists.")
+                log.success(f"Existed order status: {existed_order.status}, new status: {order.status}")
                 if not existed_order.shipping or existed_order.status != order.status:
-                    if not existed_order.shipping:
+                    updating_order = OrderUpdate(
+                        id=existed_order.id,
+                        status=existed_order.status,
+                        shipping=existed_order.shipping
+                    )
+                    if not existed_order.shipping and existed_order.status == "Completed":
                         log.info(f"Updating existed order shipping...")
                         browser = open_order_page_by_id(browser, existed_order.order_id)
-                        existed_order.shipping = get_order_shipping(browser)
+                        updating_order.shipping = get_order_shipping(browser)
                     if existed_order.status != order.status:
-                        existed_order.status = order.status
+                        updating_order.status = order.status
                         log.info(f"Updating existed order status...")
-                    new_order = update_order(order)
-                    log.success(f"Order shipping updated.")
+                    if (updating_order.shipping != existed_order.shipping
+                            or updating_order.status != existed_order.status):
+                        new_order = update_order(updating_order)
+                        log.success(f"Order data updated.")
+                    else:
+                        log.info(f"Here is no additional info to update.")
                 else:
                     log.info(f"Order {order.order_id} data up-to-date")
             ######

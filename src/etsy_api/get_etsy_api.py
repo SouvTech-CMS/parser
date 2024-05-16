@@ -100,11 +100,12 @@ def get_etsy_api(shop_id: int):
         refresh_token=auth_token.refresh_token,
         expiry=datetime.fromtimestamp(auth_token.expires_at),
     )
-
+    time.sleep(3)
     try:
         etsy_api.ping()
     except Unauthorised:
         log.warning(f"Token is expired. Requesting new token.")
+        time.sleep(10)
         refresh_auth_token(etsy_api, shop_id)
         return get_etsy_api(shop_id)
 
