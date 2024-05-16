@@ -1,6 +1,6 @@
 import requests as req
 from loguru import logger as log
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, ReadTimeout
 
 from api.auth import authorization
 from configs.env import API_URL
@@ -16,6 +16,9 @@ def create_order(order: Order) -> Order | None:
         )
     except ConnectionError:
         return create_order(order)
+    except ReadTimeout:
+        return create_order(order)
+
     if response.status_code != 200:
         log.error(f"""
             Some error when creating order.
@@ -27,6 +30,7 @@ def create_order(order: Order) -> Order | None:
     data = response.json()
     return Order(
         id=data['id'],
+        status=data['status'],
         shop_id=data['shop_id'],
         order_id=data['order_id'],
         date=data['date'],

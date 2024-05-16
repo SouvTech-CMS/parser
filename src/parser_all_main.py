@@ -85,7 +85,7 @@ if __name__ == "__main__":
                 start_time_order = datetime.now()
                 ######
 
-                log.info(f"Check if order with id {shop_order['receipt_id']} exists...")
+                log.info(f"\nCheck if order with id {shop_order['receipt_id']} exists...")
                 existed_order = check_order_in_db(str(shop_order['receipt_id']))
                 order, goods_in_order = format_order_data(
                     order=shop_order,
@@ -134,7 +134,7 @@ if __name__ == "__main__":
                             status=existed_order.status,
                             shipping=existed_order.shipping
                         )
-                        if not existed_order.shipping:
+                        if not existed_order.shipping and existed_order.status == "Completed":
                             log.info(f"Updating existed order shipping...")
                             browser = open_order_page_by_id(browser, existed_order.order_id)
                             updating_order.shipping = get_order_shipping(browser)
@@ -151,9 +151,9 @@ if __name__ == "__main__":
                         log.info(f"Order {order.order_id} data up-to-date")
                 ######
                 end_time_order = datetime.now()
-                log.critical(f"Order parsing time: {end_time_order - start_time_order}")
-                offset += 100
+                log.critical(f"Order parsing time: {end_time_order - start_time_order} \n")
                 ######
+            offset += 100
 
         log.success(f"Additional orders info fetched.")
 
