@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 class Order(BaseModel):
     id: int | None = None
+    status: str | None
     shop_id: int | None
     order_id: str | None
     date: str | None
@@ -13,3 +14,9 @@ class Order(BaseModel):
     purchased_after_ad: bool | None = None
     full_fee: float | None = None
     profit: float | None = None
+
+
+class OrderUpdate(BaseModel):
+    id: int | None
+    status: str | None
+    shipping: float | None

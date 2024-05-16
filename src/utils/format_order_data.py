@@ -17,6 +17,7 @@ def format_order_data(order: dict, shop_id: int, ):
     month = order_created_at.month
     year = order_created_at.year
     ###########
+    order_status = order['status']
     # Order date
     formated_date = f"{day}.{month}.{year}"
     # Full quantity of items in order
@@ -70,6 +71,7 @@ def format_order_data(order: dict, shop_id: int, ):
     tax_amount = tax_total['amount'] / tax_total['divisor']
     print(f"")
     order = Order(
+        status=order_status,
         shop_id=shop_id,
         order_id=str(order_id),
         date=formated_date,
