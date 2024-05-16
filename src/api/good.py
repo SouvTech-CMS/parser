@@ -1,6 +1,6 @@
 import requests as req
 from loguru import logger as log
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, ReadTimeout
 
 from api.auth import authorization
 from configs.env import API_URL
@@ -14,6 +14,8 @@ def check_good_in_base(product_id: str) -> Good | None:
             headers=authorization().model_dump(),
         )
     except ConnectionError:
+        return check_good_in_base(product_id)
+    except ReadTimeout:
         return check_good_in_base(product_id)
     if response.status_code != 200:
         return None
