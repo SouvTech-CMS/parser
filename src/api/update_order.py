@@ -4,10 +4,10 @@ from requests.exceptions import ConnectionError
 
 from api.auth import authorization
 from configs.env import API_URL
-from schemes.order import Order
+from schemes.order import Order, OrderUpdate
 
 
-def update_order(order: Order):
+def update_order(order: Order | OrderUpdate):
     try:
         response = req.put(
             f"{API_URL}/order/",
@@ -27,6 +27,7 @@ def update_order(order: Order):
     data = response.json()
     return Order(
         id=data['id'],
+        status=data['status'],
         shop_id=data['shop_id'],
         order_id=data['order_id'],
         date=data['date'],

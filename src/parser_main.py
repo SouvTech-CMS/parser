@@ -118,13 +118,18 @@ if __name__ == "__main__":
             else:
                 # Updating shipping
                 log.info(f"Order with id {existed_order.order_id} is exists.")
-                if not existed_order.shipping:
-                    log.info(f"Updating existed order shipping...")
-                    browser = open_order_page_by_id(browser, existed_order.order_id)
-                    existed_order.shipping = get_order_shipping(browser)
-                    if existed_order:
-                        new_order = update_order(order)
-                        log.success(f"Order shipping updated.")
+                if not existed_order.shipping or existed_order.status != order.status:
+                    if not existed_order.shipping:
+                        log.info(f"Updating existed order shipping...")
+                        browser = open_order_page_by_id(browser, existed_order.order_id)
+                        existed_order.shipping = get_order_shipping(browser)
+                    if existed_order.status != order.status:
+                        existed_order.status = order.status
+                        log.info(f"Updating existed order status...")
+                    new_order = update_order(order)
+                    log.success(f"Order shipping updated.")
+                else:
+                    log.info(f"Order {order.order_id} data up-to-date")
             ######
             end_time_order = datetime.now()
             log.critical(f"Order parsing time: {end_time_order - start_time_order}")
