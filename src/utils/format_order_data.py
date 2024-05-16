@@ -32,7 +32,7 @@ def format_order_data(order: dict, shop_id: int, ):
             # Creating description for new good
             description = f"Title: {trans['title']} Description: {trans['description']}"
             # Name of new good
-            name = f"{trans['sku']} + "
+            name = f"SKU: {trans['sku']} + "
             # Creating Name for new Good
             for variation in trans["variations"]:
                 if variation['formatted_name'] != "Personalization":
@@ -52,10 +52,8 @@ def format_order_data(order: dict, shop_id: int, ):
                 continue
 
         # Amount of item
-        price = trans['price']['amount'] / trans['price']['divisor']
-        log.info(f"Good In Order price {price}")
+        price = (trans['price']['amount'] / trans['price']['divisor']) * trans['quantity']
         amount = price - trans['buyer_coupon']
-        log.info(f"Good In Order price {amount}")
         #################
 
         order_items.append(

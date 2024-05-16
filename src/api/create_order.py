@@ -1,5 +1,6 @@
 import requests as req
 from loguru import logger as log
+from requests.exceptions import ConnectionError
 
 from api.auth import authorization
 from configs.env import API_URL
@@ -34,5 +35,6 @@ def create_order(order: Order) -> Order | None:
         tax=data['tax'],
         shipping=data['shipping'],
         purchased_after_ad=data['purchased_after_ad'],
+        full_fee=data['full_fee'],
         profit=data['profit'],
     )

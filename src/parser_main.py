@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from loguru import logger as log
@@ -5,7 +6,7 @@ from loguru import logger as log
 from api.check_order_in_db import check_order_in_db
 from api.create_order import create_order
 from api.fees import get_fees
-from api.good_in_order import create_good_in_order, good_in_order_by_order_id, update_good_in_order
+from api.good_in_order import create_good_in_order
 from api.update_order import update_order
 from api.update_parser_status_by_id import update_parser_status_by_id
 from configs.env import LOG_FILE
@@ -60,10 +61,9 @@ if __name__ == "__main__":
         shop_orders, orders_count = get_all_orders_by_shop_id(
             etsy_shop_id=int(shop.etsy_shop_id),
             shop_id=shop.shop_id,
-            limit=20,
+            limit=100,
             offset=0,
         )
-        log.success(f"Shop orders fetched.")
 
         orders_create: list[Order] = []
         orders_update: list[Order] = []
@@ -77,14 +77,14 @@ if __name__ == "__main__":
             ######
 
             log.info(f"Check if order with id {shop_order['receipt_id']} exists...")
-            existed_order_id = check_order_in_db(str(shop_order['receipt_id']))
+            existed_order = check_order_in_db(str(shop_order['receipt_id']))
             order, goods_in_order = format_order_data(
                 order=shop_order,
                 shop_id=shop.shop_id,
             )
             # Get order shipping and purchased after ad with selenium
             # TODO: fetch shipping of all orders with status like "Completed"
-            if existed_order_id is None:
+            if existed_order is None:
                 log.info(f"Order with id {order.order_id} is not exists.")
 
                 log.info(f"Fetching order shipping (order: {order.order_id})...")
@@ -100,26 +100,13 @@ if __name__ == "__main__":
                 if new_order:
                     log.success(f"Order created.")
                     log.info(f"Creating order goods")
-                    good_in_order_shipping = new_order.shipping / new_order.quantity
-                    good_in_order_tax = new_order.tax / new_order.quantity
-                    fee_for_item = 0
-                    # Generating full fee for order
-                    if new_order.shipping != 0 and new_order.shipping is not None:
-                        payment_tax = eval(str(new_order.buyer_paid) + fees.payment_processing_fee)
-                        item_value = new_order.buyer_paid - new_order.tax - new_order.shipping
-                        transaction_item = eval(str(item_value) + fees.transaction_item)
-                        shipping_transaction = eval(str(new_order.shipping) + fees.transaction_shipping)
-                        pack = fees.pack
-                        re_listing = fees.re_listing
-                        full_fee = re_listing + pack + shipping_transaction + transaction_item + payment_tax + order.tax + order.shipping
-                        fee_for_item = full_fee / new_order.quantity
                     for good_in_order in goods_in_order:
                         good_in_order.order_id = new_order.id
-                        good_in_order.amount = good_in_order.amount - good_in_order_shipping - good_in_order_tax
                         good = create_good_in_order(good_in_order)
                         if good:
                             log.success(
-                                f"Successfully added good in order with order_id {good.order_id}, good_id {good.good_id}, amount {good.amount}, quantity {good.quantity}")
+                                f"Successfully added good in order with order_id {good.order_id}, "
+                                f"good_id {good.good_id}, amount {good.amount}, quantity {good.quantity}")
                         else:
                             log.error(
                                 f"Couldn't add good in order with order_id {good_in_order.order_id}, good_id "
@@ -129,23 +116,15 @@ if __name__ == "__main__":
                 else:
                     log.error(f"Couldn't create order with id {order.order_id}")
             else:
-                order.id = existed_order_id
-                log.info(f"Order with id {order.order_id} is exists.")
-                log.info(f"Updating existed order...")
-                update_order(order)
-                log.success(f"Order updated.")
-                log.info("Getting good in orders from db for comparison")
-                goods_in_order_from_db = good_in_order_by_order_id(order.id)
-
-                for good_in_order_from_db in goods_in_order_from_db:
-                    for good_in_order in goods_in_order:
-                        if (good_in_order_from_db.good_id == good_in_order.good_id
-                                and good_in_order_from_db.amount != good_in_order.amount):
-                            log.info(f"Differences found updating good in order")
-                            good_in_order_from_db.amount = good_in_order.amount
-                            _ = update_good_in_order(good_in_order_from_db)
-                            if _:
-                                log.success(f"Updated good in order")
+                # Updating shipping
+                log.info(f"Order with id {existed_order.order_id} is exists.")
+                if not existed_order.shipping:
+                    log.info(f"Updating existed order shipping...")
+                    browser = open_order_page_by_id(browser, existed_order.order_id)
+                    existed_order.shipping = get_order_shipping(browser)
+                    if existed_order:
+                        new_order = update_order(order)
+                        log.success(f"Order shipping updated.")
             ######
             end_time_order = datetime.now()
             log.critical(f"Order parsing time: {end_time_order - start_time_order}")
