@@ -69,7 +69,6 @@ def format_order_data(order: dict, shop_id: int, ):
     buyer_paid = order_total['amount'] / order_total['divisor']
     tax_total = order['total_tax_cost']
     tax_amount = tax_total['amount'] / tax_total['divisor']
-    print(f"")
     order = Order(
         status=order_status,
         shop_id=shop_id,
@@ -80,4 +79,4 @@ def format_order_data(order: dict, shop_id: int, ):
         tax=tax_amount,
     )
 
-    return order, order_items
+    return order, order_items, day, month
