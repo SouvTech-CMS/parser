@@ -30,7 +30,7 @@ PARSER_WAIT_TIME_IN_SECONDS = 60 * 60 * 2
 
 def etsy_api_parser():
     shops_data = get_parser_shops_data()
-
+    now_hour = datetime.now().hour
     for shop in shops_data:
         shop_error = False
 
@@ -45,6 +45,7 @@ def etsy_api_parser():
         that_month = True
         offset = 0
         date = datetime.now() - timedelta(days=30)
+        weekday = datetime.now().weekday()
         while that_month:
             log.info(f"Fetching orders from {offset} to {offset + 100} from shop {shop.shop_name}...")
             try:
@@ -147,6 +148,9 @@ def etsy_api_parser():
                 # log.critical(f"Order parsing time: {end_time_order - start_time_order}")
                 ######
             offset += 100
+
+            if offset > 200 and now_hour < 20 and (weekday != 6 or weekday != 5):
+                break
 
         if shop_error:
             continue
