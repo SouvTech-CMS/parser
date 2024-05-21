@@ -159,6 +159,8 @@ def etsy_api_parser():
         update_parser_status_by_id(
             parser_id=shop.parser_id,
             status=ParserStatus.OK_AND_WAIT,
+            last_parsed=datetime.now().timestamp(),
+
         )
         log.success(f"Parser status updated.")
         log.success(f"Shop {shop.shop_id} - {shop.shop_name} parsed.")
