@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, timedelta
 
 from loguru import logger as log
@@ -23,13 +24,16 @@ log.add(
     serialize=True
 )
 
-# Every 15 minutes
-PARSER_WAIT_TIME_IN_SECONDS = 60 * 15
+# Every 2 hours
+PARSER_WAIT_TIME_IN_SECONDS = 60 * 60 * 2
 
-if __name__ == "__main__":
+
+def etsy_api_parser():
     shops_data = get_parser_shops_data()
 
     for shop in shops_data:
+        shop_error = False
+
         start_time_shop = datetime.now()
         log.info(f"Parsing shop {shop.shop_id} - {shop.shop_name}...")
         log.info(f"Updating parser {shop.parser_id} status to {ParserStatus.PARSING}...")
@@ -42,13 +46,22 @@ if __name__ == "__main__":
         offset = 0
         date = datetime.now() - timedelta(days=30)
         while that_month:
-            log.info(f"Fetching orders from {offset} to {offset+100} from shop {shop.shop_name}...")
-            shop_orders, _ = get_all_orders_by_shop_id(
-                etsy_shop_id=int(shop.etsy_shop_id),
-                shop_id=shop.shop_id,
-                limit=100,
-                offset=offset,
-            )
+            log.info(f"Fetching orders from {offset} to {offset + 100} from shop {shop.shop_name}...")
+            try:
+                shop_orders, _ = get_all_orders_by_shop_id(
+                    etsy_shop_id=int(shop.etsy_shop_id),
+                    shop_id=shop.shop_id,
+                    limit=100,
+                    offset=offset,
+                )
+            except Exception as e:
+                log.critical(f"Some error in getting info from ETSY API: {e}")
+                update_parser_status_by_id(
+                    parser_id=shop.parser_id,
+                    status=ParserStatus.ETSY_API_ERROR,
+                )
+                shop_error = True
+                break
 
             # Get order details and split for creating and updating
             for shop_order in shop_orders:
@@ -105,6 +118,7 @@ if __name__ == "__main__":
                             status=existed_order.status,
                             shipping=existed_order.shipping
                         )
+
                         # TODO delete this
                         if not updating_order.shipping:
                             if existed_order.quantity <= 10:
@@ -122,16 +136,20 @@ if __name__ == "__main__":
                         if (updating_order.shipping != existed_order.shipping
                                 or updating_order.status != existed_order.status):
                             new_order = update_order(updating_order)
-                            log.success(f"Order data updated.")
+                            if new_order:
+                                log.success(f"Order data updated.")
                         else:
                             log.info(f"Here is no additional info to update.")
                     else:
                         log.info(f"Order {order.order_id} data up-to-date")
                 ######
                 end_time_order = datetime.now()
-                log.critical(f"Order parsing time: {end_time_order - start_time_order}")
+                # log.critical(f"Order parsing time: {end_time_order - start_time_order}")
                 ######
             offset += 100
+
+        if shop_error:
+            continue
 
         log.info(f"Updating parser {shop.parser_id} status to {ParserStatus.OK_AND_WAIT}...")
         update_parser_status_by_id(
@@ -141,6 +159,12 @@ if __name__ == "__main__":
         log.success(f"Parser status updated.")
         log.success(f"Shop {shop.shop_id} - {shop.shop_name} parsed.")
         end_time_shop = datetime.now()
-        log.critical(f"Shop parsing time: {end_time_shop - start_time_shop}")
+        # log.critical(f"Shop parsing time: {end_time_shop - start_time_shop}")
 
     log.success(f"Parsing finished, wait {PARSER_WAIT_TIME_IN_SECONDS} seconds to repeat.")
+
+
+if __name__ == "__main__":
+    while True:
+        etsy_api_parser()
+        time.sleep(PARSER_WAIT_TIME_IN_SECONDS)

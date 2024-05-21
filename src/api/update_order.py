@@ -7,7 +7,7 @@ from configs.env import API_URL
 from schemes.order import Order, OrderUpdate
 
 
-def update_order(order: Order | OrderUpdate):
+def update_order(order: Order | OrderUpdate) -> Order | None:
     try:
         response = req.put(
             f"{API_URL}/order/",
