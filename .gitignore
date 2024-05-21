@@ -9,6 +9,6 @@ __pycache__/
 .env
 venv/
 
-# Site samples for parser
-*.html
-/data/logs.json
+
+# Data Folder
+/data/
