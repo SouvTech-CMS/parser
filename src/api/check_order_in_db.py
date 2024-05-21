@@ -1,5 +1,4 @@
 import requests as req
-from requests.exceptions import ConnectionError
 
 from api.auth import authorization
 from configs.env import API_URL

@@ -1,9 +1,8 @@
 import json
 
 import uvicorn
-from fastapi import FastAPI, Response
-
 from constants.auth_code import AUTH_CODE_RESPONSE_FILE_PATH
+from fastapi import FastAPI, Response
 
 app = FastAPI()
 

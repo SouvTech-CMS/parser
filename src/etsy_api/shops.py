@@ -1,5 +1,3 @@
-import json
-
 from constants.shops_names import ShopName
 from etsy_api.get_etsy_api import get_etsy_api
 
@@ -7,12 +5,6 @@ from etsy_api.get_etsy_api import get_etsy_api
 def find_shop_by_name(shop_name: str, shop_id: int):
     etsy_api = get_etsy_api(shop_id)
     shop = etsy_api.find_shops(shop_name)
-    return shop
-
-
-def get_shop_by_id(shop_id: int):
-    etsy_api = get_etsy_api()
-    shop = etsy_api.get_shop(shop_id)
     return shop
 
 

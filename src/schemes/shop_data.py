@@ -5,6 +5,7 @@ class ShopData(BaseModel):
     parser_id: int
     shop_id: int
     shop_name: str
+    # TODO delete param shop cookie
     shop_cookie: str
     shop_token: str
     shop_refresh_token: str

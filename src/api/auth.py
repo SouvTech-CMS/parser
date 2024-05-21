@@ -1,5 +1,3 @@
-import requests as req
-
 from configs.env import API_AUTH_TOKEN
 from schemes.auth import Auth
 

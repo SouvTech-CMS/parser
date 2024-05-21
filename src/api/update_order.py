@@ -1,6 +1,5 @@
 import requests as req
 from loguru import logger as log
-from requests.exceptions import ConnectionError
 
 from api.auth import authorization
 from configs.env import API_URL
