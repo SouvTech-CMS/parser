@@ -70,7 +70,7 @@ def etsy_api_parser():
                 start_time_order = datetime.now()
                 ######
 
-                log.info(f"Check if order with id {shop_order['receipt_id']} exists...")
+                # log.info(f"Check if order with id {shop_order['receipt_id']} exists...")
                 existed_order = check_order_in_db(str(shop_order['receipt_id']))
                 order, goods_in_order, day, month = format_order_data(
                     order=shop_order,
@@ -81,7 +81,7 @@ def etsy_api_parser():
                     break
                 # Adding order goods
                 if existed_order is None:
-                    log.info(f"Order with id {order.order_id} is not exists.")
+                    # log.info(f"Order with id {order.order_id} is not exists.")
                     # Shipping static
                     if order.quantity <= 10:
                         order.shipping = 4.5
@@ -112,7 +112,7 @@ def etsy_api_parser():
                         log.error(f"Couldn't create order with id {order.order_id}")
                 else:
                     # Updating shipping
-                    log.info(f"Order with id {existed_order.order_id} is exists.")
+                    # log.info(f"Order with id {existed_order.order_id} is exists.")
                     if existed_order.status != order.status:
                         updating_order = OrderUpdate(
                             id=existed_order.id,
@@ -122,16 +122,19 @@ def etsy_api_parser():
 
                         if existed_order.status != order.status:
                             updating_order.status = order.status
-                            log.info(f"Updating existed order status...")
+                            # log.info(f"Updating existed order status...")
                         if (updating_order.shipping != existed_order.shipping
                                 or updating_order.status != existed_order.status):
                             new_order = update_order(updating_order)
                             if new_order:
-                                log.success(f"Order data updated.")
+                                pass
+                                # log.success(f"Order data updated.")
                         else:
-                            log.info(f"Here is no additional info to update.")
+                            pass
+                            # log.info(f"Here is no additional info to update.")
                     else:
-                        log.info(f"Order {order.order_id} data up-to-date")
+                        pass
+                        # log.info(f"Order {order.order_id} data up-to-date")
                 ######
                 end_time_order = datetime.now()
                 # log.critical(f"Order parsing time: {end_time_order - start_time_order}")
