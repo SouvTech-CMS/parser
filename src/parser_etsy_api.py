@@ -120,17 +120,6 @@ def etsy_api_parser():
                             shipping=existed_order.shipping
                         )
 
-                        # TODO delete this
-                        if not updating_order.shipping:
-                            if existed_order.quantity <= 10:
-                                updating_order.shipping = 4.5
-                            elif existed_order.quantity <= 20:
-                                updating_order.shipping = 6.5
-                            elif existed_order.quantity <= 30:
-                                updating_order.shipping = 15.6
-                            else:
-                                updating_order.shipping = 18
-
                         if existed_order.status != order.status:
                             updating_order.status = order.status
                             log.info(f"Updating existed order status...")
