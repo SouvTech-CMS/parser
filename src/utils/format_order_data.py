@@ -27,24 +27,18 @@ def format_order_data(order: dict, shop_id: int, ):
         # Full quantity of order items
         quantity += trans['quantity']
         # Check is good in our base
-        good = check_good_in_base(trans['product_id'])
+        # Name of good
+        uniquename = trans['sku'].split("#")[0]
+        good = check_good_in_base(shop_id=shop_id, uniquename=uniquename)
         # Name For good if it not in our base
         if not good:
             # Creating description for new good
             description = f"Title: {trans['title']} Description: {trans['description']}"
-            # Name of new good
-            name = f"SKU: {trans['sku']} + "
-            # Creating Name for new Good
-            for variation in trans["variations"]:
-                if variation['formatted_name'] != "Personalization":
-                    name += f"{variation['formatted_name']}: {variation['formatted_value']} + "
             # Creating new good object
             new_good = GoodCreate(
                 shop_id=shop_id,
-                product_id=str(trans['product_id']),
-                listing_id=str(trans['listing_id']),
-                name=name,
-                description=description,
+                uniquename=uniquename,
+                price=423,
             )
             # Creating Good in our Base
             good = good_create(new_good)

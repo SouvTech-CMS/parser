@@ -18,17 +18,14 @@ class GoodInOrder(BaseModel):
 
 class GoodCreate(BaseModel):
     shop_id: int | None = None
-    product_id: str | None = None
-    listing_id: str | None = None
-    name: str | None = None
-    description: str | None = None
+    uniquename: str | None = None
+    price: float | None = None
 
 
 class Good(BaseModel):
     id: int | None = None
     shop_id: int | None = None
-    product_id: str | None = None
-    listing_id: str | None = None
+    uniquename: str | None = None
     price: float | None = None
     name: str | None = None
     description: str | None = None

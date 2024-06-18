@@ -7,26 +7,22 @@ from configs.env import API_URL
 from schemes.order_item import Good, GoodCreate
 
 
-def check_good_in_base(product_id: str) -> Good | None:
+def check_good_in_base(shop_id: int, uniquename: str) -> Good | None:
     try:
         response = req.get(
-            f"{API_URL}/good/by_product_id/{product_id}",
+            f"{API_URL}/good/get_by_uniquename_and_shop_id/",
             headers=authorization().model_dump(),
+            params={
+                "uniquename": uniquename,
+                "shop_id": shop_id
+            }
         )
     except Exception:
-        return check_good_in_base(product_id)
+        return check_good_in_base(shop_id, uniquename)
     if response.status_code != 200:
         return None
     data = response.json()
-    return Good(
-        id=data['id'],
-        shop_id=data['shop_id'],
-        product_id=data['product_id'],
-        listing_id=data['listing_id'],
-        price=data['price'],
-        name=data['name'],
-        description=data['description']
-    )
+    return Good(**data)
 
 
 def good_create(good: GoodCreate) -> Good | None:
@@ -41,15 +37,7 @@ def good_create(good: GoodCreate) -> Good | None:
         return good_create(good)
     if response.status_code == 200:
         data = response.json()
-        return Good(
-            id=data['id'],
-            shop_id=data['shop_id'],
-            product_id=data['product_id'],
-            listing_id=data['listing_id'],
-            price=data['price'],
-            name=data['name'],
-            description=data['description'],
-        )
+        return Good(**data)
 
     log.critical("Couldn't create good ")
     return None
