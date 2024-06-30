@@ -58,11 +58,7 @@ if __name__ == "__main__":
 
             # Get order details and split for creating and updating
             for shop_order in shop_orders:
-                ######
-                start_time_order = datetime.now()
-                ######
 
-                log.info(f"Check if order with id {shop_order['receipt_id']} exists...")
                 existed_order = check_order_in_db(str(shop_order['receipt_id']))
                 order, goods_in_order, day, month = format_order_data(
                     order=shop_order,
@@ -87,38 +83,16 @@ if __name__ == "__main__":
                         for good_in_order in goods_in_order:
                             good_in_order.order_id = new_order.id
                             good = create_good_in_order(good_in_order)
-                            if good:
-                                log.success(
-                                    f"Successfully added good in order with order_id {good.order_id}, "
-                                    f"good_id {good.good_id}, amount {good.amount}, quantity {good.quantity}")
-                            else:
-                                log.error(
-                                    f"Couldn't add good in order with order_id {good_in_order.order_id}, good_id "
-                                    f"{good_in_order.good_id}, amount {good_in_order.amount}, "
-                                    f"quantity {good_in_order.quantity}")
 
                     else:
                         log.error(f"Couldn't create order with id {order.order_id}")
                 else:
-                    # Updating shipping
-                    log.info(f"Order with id {existed_order.order_id} is exists.")
                     if existed_order.status != order.status:
                         updating_order = OrderUpdate(
                             id=existed_order.id,
                             status=existed_order.status,
                             shipping=existed_order.shipping
                         )
-                        # TODO delete this
-                        if not updating_order.shipping:
-                            if existed_order.quantity <= 10:
-                                updating_order.shipping = 4.5
-                            elif existed_order.quantity <= 20:
-                                updating_order.shipping = 6.5
-                            elif existed_order.quantity <= 30:
-                                updating_order.shipping = 15.6
-                            else:
-                                updating_order.shipping = 18
-
                         if existed_order.status != order.status:
                             updating_order.status = order.status
                             log.info(f"Updating existed order status...")
@@ -130,10 +104,6 @@ if __name__ == "__main__":
                             log.info(f"Here is no additional info to update.")
                     else:
                         log.info(f"Order {order.order_id} data up-to-date")
-                ######
-                end_time_order = datetime.now()
-                log.critical(f"Order parsing time: {end_time_order - start_time_order}")
-                ######
             offset += 100
 
         log.info(f"Updating parser {shop.parser_id} status to {ParserStatus.OK_AND_WAIT}...")
