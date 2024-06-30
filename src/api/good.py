@@ -1,6 +1,5 @@
 import requests as req
 from loguru import logger as log
-from requests.exceptions import ConnectionError
 
 from api.auth import authorization
 from configs.env import API_URL
@@ -27,14 +26,17 @@ def check_good_in_base(shop_id: int, uniquename: str) -> Good | None:
 
 def good_create(good: GoodCreate) -> Good | None:
     try:
-
         response = req.post(
             f"{API_URL}/good",
             headers=authorization().model_dump(),
             json=good.model_dump()
         )
-    except ConnectionError:
-        return good_create(good)
+    except Exception:
+        _good = check_good_in_base(good.shop_id, good.uniquename)
+        if not _good:
+            return good_create(good)
+        else:
+            return _good
     if response.status_code == 200:
         data = response.json()
         return Good(**data)
