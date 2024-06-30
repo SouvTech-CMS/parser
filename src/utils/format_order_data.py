@@ -28,8 +28,9 @@ def format_order_data(order: dict, shop_id: int, ):
         quantity += trans['quantity']
         # Check is good in our base
         # Name of good
-        uniquename = trans['sku']
-        good = check_good_in_base(shop_id=shop_id, uniquename=uniquename)
+        uniquename: str = trans['sku']
+        _uniquename = uniquename.split("#")[0]
+        good = check_good_in_base(shop_id=shop_id, uniquename=_uniquename)
         # Name For good if it not in our base
         if not good:
             # Creating new good object
