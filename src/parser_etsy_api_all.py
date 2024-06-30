@@ -24,14 +24,12 @@ log.add(
 )
 
 # Every 15 minutes
-PARSER_WAIT_TIME_IN_SECONDS = 60 * 15
+PARSER_WAIT_TIME_IN_SECONDS = 60 * 60 * 2
 
 if __name__ == "__main__":
     shops_data = get_parser_shops_data()
 
     for shop in shops_data:
-        if shop.shop_id == 3:
-            continue
         start_time_shop = datetime.now()
         log.info(f"Parsing shop {shop.shop_id} - {shop.shop_name}...")
         log.info(f"Updating parser {shop.parser_id} status to {ParserStatus.PARSING}...")
@@ -125,7 +123,7 @@ if __name__ == "__main__":
                             updating_order.status = order.status
                             log.info(f"Updating existed order status...")
                         if (updating_order.shipping != existed_order.shipping
-                                or updating_order.status != existed_order.status):
+                            or updating_order.status != existed_order.status):
                             new_order = update_order(updating_order)
                             log.success(f"Order data updated.")
                         else:

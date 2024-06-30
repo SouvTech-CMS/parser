@@ -40,7 +40,7 @@ def format_order_data(order: dict, shop_id: int, ):
             # Creating Good in our Base
             good = good_create(new_good)
             if not good:
-                log.critical(f"Couldn't create a new good with product id {new_good.product_id}")
+                log.critical(f"Couldn't create a new good with uniquename {new_good.uniquename}")
                 continue
 
         # Amount of item
