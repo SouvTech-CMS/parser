@@ -22,13 +22,7 @@ def good_in_order_by_order_id(order_id: int):
         data = response.json()
         for good_in_order in data:
             list_of_goods_in_order.append(
-                GoodInOrder(
-                    id=good_in_order['id'],
-                    order_id=good_in_order['order_id'],
-                    good_id=good_in_order['good_id'],
-                    quantity=good_in_order['quantity'],
-                    amount=good_in_order['amount'],
-                )
+                GoodInOrder(**response.json())
             )
         return list_of_goods_in_order
     return None
@@ -45,13 +39,7 @@ def create_good_in_order(good: GoodInOrderCreate) -> GoodInOrder | None:
         return create_good_in_order(good)
     if response.status_code == 200:
         data = response.json()
-        return GoodInOrder(
-            id=data['id'],
-            order_id=data['order_id'],
-            good_id=data['good_id'],
-            quantity=data['quantity'],
-            amount=data['amount'],
-        )
+        return GoodInOrder(**response.json())
     return None
 
 
@@ -66,11 +54,5 @@ def update_good_in_order(good: GoodInOrder) -> GoodInOrder | None:
         return update_good_in_order(good)
     if response.status_code == 200:
         data = response.json()
-        return GoodInOrder(
-            id=data['id'],
-            order_id=data['order_id'],
-            good_id=data['good_id'],
-            quantity=data['quantity'],
-            amount=data['amount'],
-        )
+        return GoodInOrder(**response.json())
     return None
