@@ -62,6 +62,7 @@ def _get_auth_token(shop_id: int) -> AuthToken:
             state=STATE,
         )
         auth_token_response = etsy_auth.get_access_token()
+        log.info(f"Auth token response: {auth_token_response}")
         auth_token = AuthToken(
             access_token=auth_token_response['access_token'],
             refresh_token=auth_token_response['refresh_token'],
