@@ -1,3 +1,4 @@
+import pprint
 import time
 from datetime import datetime, timedelta
 
@@ -57,6 +58,7 @@ def etsy_api_parser():
                 )
             except Exception as e:
                 log.critical(f"Some error in getting info from ETSY API: {e}")
+                pprint.pprint(e)
                 update_parser_status_by_id(
                     parser_id=shop.parser_id,
                     status=ParserStatus.ETSY_API_ERROR,
