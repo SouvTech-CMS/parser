@@ -26,7 +26,7 @@ class SouvTechEtsyAPI(EtsyAPI):
             "refresh_token": self.refresh_token,
         }
         del self.session.headers["Authorization"]
-        r = self.session.post("https://api.etsy.com/v3/public/oauth/token", params=data)
+        r = self.session.post("https://api.etsy.com/v3/public/oauth/token", data=data)
         log.info(f"Refresh token status code: {r.status_code}")
         refreshed = r.json()
         log.info(f"Refresh token response: {refreshed}")

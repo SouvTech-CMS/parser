@@ -35,6 +35,9 @@ def etsy_api_parser():
     for shop in shops_data:
         shop_error = False
 
+        if shop.shop_id == 3:
+            continue
+
         start_time_shop = datetime.now()
         log.info(f"Parsing shop {shop.shop_id} - {shop.shop_name}...")
         log.info(f"Updating parser {shop.parser_id} status to {ParserStatus.PARSING}...")
