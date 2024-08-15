@@ -144,7 +144,7 @@ def get_etsy_api(shop_id: int):
     etsy_api.shop_id = shop_id
     time.sleep(3)
     # try:
-    etsy_api.ping()
+    # etsy_api.ping()
     # except Unauthorised:
     #     log.warning(f"Token is expired. Requesting new token.")
     #     time.sleep(10)
