@@ -3,8 +3,8 @@ import time
 from datetime import datetime, timedelta
 
 from etsyv3 import EtsyAPI
-from etsyv3.etsy_api import Unauthorised
 from loguru import logger as log
+from typing_extensions import deprecated
 
 from configs.env import ETSY_API_KEY
 from constants.etsy_oauth import etsy_auth, STATE
@@ -18,6 +18,8 @@ AUTH_TOKEN_LIFE_TIME_IN_SECONDS = 3600
 
 
 class SouvTechEtsyAPI(EtsyAPI):
+    shop_id: int
+
     def refresh(self) -> tuple[str, str, datetime]:
         log.info(f"Custom refreshing Etsy access token..")
         data = {
@@ -37,6 +39,20 @@ class SouvTechEtsyAPI(EtsyAPI):
         self.session.headers["Authorization"] = "Bearer " + self.token
         if self.refresh_save is not None:
             self.refresh_save(self.token, self.refresh_token, self.expiry)
+
+        # Update access token info in config
+        log.success(f"New access token: {self.token}")
+        log.success(f"New refresh token: {self.refresh_token}")
+        log.success(f"New expiry: {self.expiry}")
+
+        new_auth_token = AuthToken(
+            access_token=self.token,
+            refresh_token=self.refresh_token,
+            expires_at=self.expiry.timestamp(),
+        )
+        _save_auth_token(new_auth_token, self.shop_id)
+        #########
+
         return self.token, self.refresh_token, self.expiry
 
 
@@ -102,6 +118,7 @@ def _get_auth_token(shop_id: int) -> AuthToken:
     return auth_token
 
 
+@deprecated("Token refresh inside EtsyAPI, not needed")
 def refresh_auth_token(etsy_api: SouvTechEtsyAPI, shop_id: int):
     new_access_token, new_refresh_token, new_expires_at = etsy_api.refresh()
     log.success(f"New access token: {new_access_token}")
@@ -124,13 +141,14 @@ def get_etsy_api(shop_id: int):
         refresh_token=auth_token.refresh_token,
         expiry=datetime.fromtimestamp(auth_token.expires_at),
     )
+    etsy_api.shop_id = shop_id
     time.sleep(3)
-    try:
-        etsy_api.ping()
-    except Unauthorised:
-        log.warning(f"Token is expired. Requesting new token.")
-        time.sleep(10)
-        refresh_auth_token(etsy_api, shop_id)
-        return get_etsy_api(shop_id)
+    # try:
+    etsy_api.ping()
+    # except Unauthorised:
+    #     log.warning(f"Token is expired. Requesting new token.")
+    #     time.sleep(10)
+    #     refresh_auth_token(etsy_api, shop_id)
+    #     return get_etsy_api(shop_id)
 
     return etsy_api

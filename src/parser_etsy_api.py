@@ -35,9 +35,6 @@ def etsy_api_parser():
     for shop in shops_data:
         shop_error = False
 
-        if shop.shop_id == 3:
-            continue
-
         start_time_shop = datetime.now()
         log.info(f"Parsing shop {shop.shop_id} - {shop.shop_name}...")
         log.info(f"Updating parser {shop.parser_id} status to {ParserStatus.PARSING}...")
@@ -130,7 +127,7 @@ def etsy_api_parser():
                             updating_order.status = order.status
                             # log.info(f"Updating existed order status...")
                         if (updating_order.shipping != existed_order.shipping
-                                or updating_order.status != existed_order.status):
+                            or updating_order.status != existed_order.status):
                             new_order = update_order(updating_order)
                             if new_order:
                                 pass
