@@ -1,6 +1,6 @@
 import json
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from etsyv3 import EtsyAPI
 from etsyv3.etsy_api import Unauthorised
@@ -15,6 +15,26 @@ from schemes.shop_data import ShopData
 
 AUTH_CODE_WAIT_TIME_IN_SECONDS = 15
 AUTH_TOKEN_LIFE_TIME_IN_SECONDS = 3600
+
+
+class SouvTechEtsyAPI(EtsyAPI):
+    def refresh(self) -> tuple[str, str, datetime]:
+        data = {
+            "grant_type": "refresh_token",
+            "client_id": self.keystring,
+            "refresh_token": self.refresh_token,
+        }
+        del self.session.headers["Authorization"]
+        r = self.session.post("https://api.etsy.com/v3/public/oauth/token", params=data)
+        refreshed = r.json()
+        self.token = refreshed["access_token"]
+        self.refresh_token = refreshed["refresh_token"]
+        tmp_expiry = datetime.utcnow() + timedelta(seconds=refreshed["expires_in"])
+        self.expiry = tmp_expiry
+        self.session.headers["Authorization"] = "Bearer " + self.token
+        if self.refresh_save is not None:
+            self.refresh_save(self.token, self.refresh_token, self.expiry)
+        return self.token, self.refresh_token, self.expiry
 
 
 def _get_shop_data_by_id(shop_id: int) -> ShopData:
@@ -79,7 +99,7 @@ def _get_auth_token(shop_id: int) -> AuthToken:
     return auth_token
 
 
-def refresh_auth_token(etsy_api: EtsyAPI, shop_id: int):
+def refresh_auth_token(etsy_api: SouvTechEtsyAPI, shop_id: int):
     new_access_token, new_refresh_token, new_expires_at = etsy_api.refresh()
     log.success(f"New access token: {new_access_token}")
     log.success(f"New refresh token: {new_refresh_token}")
@@ -95,7 +115,7 @@ def refresh_auth_token(etsy_api: EtsyAPI, shop_id: int):
 def get_etsy_api(shop_id: int):
     auth_token = _get_auth_token(shop_id)
 
-    etsy_api = EtsyAPI(
+    etsy_api = SouvTechEtsyAPI(
         keystring=ETSY_API_KEY,
         token=auth_token.access_token,
         refresh_token=auth_token.refresh_token,
