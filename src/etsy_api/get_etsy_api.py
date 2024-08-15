@@ -19,6 +19,7 @@ AUTH_TOKEN_LIFE_TIME_IN_SECONDS = 3600
 
 class SouvTechEtsyAPI(EtsyAPI):
     def refresh(self) -> tuple[str, str, datetime]:
+        log.info(f"Custom refreshing Etsy access token..")
         data = {
             "grant_type": "refresh_token",
             "client_id": self.keystring,
@@ -26,7 +27,9 @@ class SouvTechEtsyAPI(EtsyAPI):
         }
         del self.session.headers["Authorization"]
         r = self.session.post("https://api.etsy.com/v3/public/oauth/token", params=data)
+        log.info(f"Refresh token status code: {r.status_code}")
         refreshed = r.json()
+        log.info(f"Refresh token response: {refreshed}")
         self.token = refreshed["access_token"]
         self.refresh_token = refreshed["refresh_token"]
         tmp_expiry = datetime.utcnow() + timedelta(seconds=refreshed["expires_in"])
