@@ -27,7 +27,7 @@ def check_good_in_base(shop_id: int, uniquename: str) -> Good | None:
 def good_create(good: GoodCreate) -> Good | None:
     try:
         response = req.post(
-            f"{API_URL}/good",
+            f"{API_URL}/good/",
             headers=authorization().model_dump(),
             json=good.model_dump()
         )
