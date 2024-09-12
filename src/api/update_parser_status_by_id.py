@@ -18,7 +18,9 @@ def update_parser_status_by_id(parser_id: int, status: int, last_parsed: float |
             headers=authorization().model_dump(),
             json=data
         )
-    except Exception:
+        print(f"HTTP Exception on update parser status: {response.status_code}")
+    except Exception as e:
+        print(f"Exception on update parser status {e}")
         return update_parser_status_by_id(parser_id, status)
     if response.status_code != 200:
         log.error(f"""
