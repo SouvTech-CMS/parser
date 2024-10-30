@@ -69,7 +69,7 @@ if __name__ == "__main__":
                     log.info(f"Order with id {order.order_id} is not exists.")
                     # Shipping static
                     if order.quantity <= 10:
-                        order.shipping = 4.5
+                        order.shipping = 5
                     elif order.quantity <= 20:
                         order.shipping = 6.5
                     elif order.quantity <= 30:
