@@ -1,74 +1,98 @@
 from datetime import datetime
-
 from loguru import logger as log
+from schemes.city import City
 
-from api.good import check_good_in_base, good_create
 from schemes.order import Order
-from schemes.order_item import GoodCreate, GoodInOrderCreate
+from schemes.order_item import GoodInOrder
+from schemes.client import Client
 
 
-def format_order_data(order: dict, shop_id: int, ):
-    order_id = order['receipt_id']
+def format_order_data(
+    order: dict,
+):
+    order_id = order["receipt_id"]
     # Good in orders
     order_items = []
-    order_created_at = datetime.fromtimestamp(order['created_timestamp'])
+    order_created_at = datetime.fromtimestamp(order["created_timestamp"])
     ###########
     day = order_created_at.day
     month = order_created_at.month
     year = order_created_at.year
     ###########
-    order_status = order['status']
+    order_status = order["status"]
     # Order date
     formated_date = f"{day}.{month}.{year}"
     # Full quantity of items in order
-    quantity = 0
+    full_items_quantity = 0
+
+    # Getting order shipping info
+    _shipping_info = order["shipments"]
+    shipping_id = ""
+    tracking_code = ""
+    if len(_shipping_info):
+        shipping_id = str(_shipping_info[0]["receipt_shipping_id"])
+        tracking_code = str(_shipping_info[0]["tracking_code"])
+
+    # Getting order city and state ordered from
+    city = City()
+    try:
+        city = City(name=order["city"], state=order["state"])
+    except Exception:
+        pass
+    # Getting client info
+    client = Client()
+    try:
+        client = Client(
+            shop_client_id=str(order["buyer_user_id"]),
+            name=order["name"],
+            email=order["buyer_email"]
+        )
+    except Exception:
+        pass
     # Creating goods and good in order objects
-    for trans in order['transactions']:
+    for trans in order["transactions"]:
+        # Quantity of item
+        quantity = trans["quantity"]
         # Full quantity of order items
-        quantity += trans['quantity']
-        # Check is good in our base
+        full_items_quantity += quantity
         # Name of good
-        uniquename: str = trans['sku']
-        _uniquename = uniquename.split("#")[0]
-        good = check_good_in_base(shop_id=shop_id, uniquename=_uniquename)
-        # Name For good if it not in our base
-        if not good:
-            # Creating new good object
-            new_good = GoodCreate(
-                shop_id=shop_id,
-                uniquename=uniquename,
+        uniquename: str = trans["sku"]
+        # Getting all aditional engraving info
+        engraving_info: str = "["
+        for variation in trans["variations"]:
+            engraving_info += "{"
+            engraving_info += "'{name}': '{value}'".format(
+                name=variation["formatted_name"], value=variation["formatted_value"]
             )
-            # Creating Good in our Base
-            good = good_create(new_good)
-            if not good:
-                log.critical(f"Couldn't create a new good with uniquename {new_good.uniquename}")
-                continue
+            engraving_info += "}, "
+        engraving_info = engraving_info.rstrip(", ") + "]"
 
         # Amount of item
-        price = (trans['price']['amount'] / trans['price']['divisor']) * trans['quantity']
-        amount = price - trans['buyer_coupon']
+        price = (trans["price"]["amount"] / trans["price"]["divisor"]) * quantity
+        amount = price - trans["buyer_coupon"]
         #################
-
         order_items.append(
-            GoodInOrderCreate(
-                good_id=good.id,
-                quantity=trans['quantity'],
+            GoodInOrder(
+                uniquename=uniquename,
+                quantity=quantity,
                 amount=amount,
+                engraving_info=engraving_info,
             )
         )
 
-    order_total = order['grandtotal']
-    buyer_paid = order_total['amount'] / order_total['divisor']
-    tax_total = order['total_tax_cost']
-    tax_amount = tax_total['amount'] / tax_total['divisor']
+    order_total = order["grandtotal"]
+    buyer_paid = order_total["amount"] / order_total["divisor"]
+    tax_total = order["total_tax_cost"]
+    tax_amount = tax_total["amount"] / tax_total["divisor"]
     order = Order(
         status=order_status,
-        shop_id=shop_id,
         order_id=str(order_id),
         date=formated_date,
-        quantity=quantity,
+        quantity=full_items_quantity,
         buyer_paid=buyer_paid,
         tax=tax_amount,
+        shipping_id=shipping_id,
+        tracking_code=tracking_code,
     )
 
-    return order, order_items, day, month
+    return order, order_items, day, month, client, city
