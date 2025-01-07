@@ -6,14 +6,15 @@ from configs.env import API_URL
 from schemes.upload_order import UploadingOrderData
 
 
-def upload_orders_data(orders: UploadingOrderData) -> None:
+def upload_orders_data(orders: UploadingOrderData) -> bool:
     try:
         response = req.post(
             f"{API_URL}/parser/orders/upload/",
             headers=authorization().model_dump(),
             json=orders.model_dump(),
         )
-    except Exception:
+    except Exception as e:
+        log.error(f"Some critical exception on uploading orders\n\t{e}")
         return upload_orders_data(orders)
 
     if response.status_code != 200:
