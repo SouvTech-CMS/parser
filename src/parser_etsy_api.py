@@ -97,17 +97,6 @@ def etsy_api_parser():
                     )
                 )
 
-                # Shipping static
-                # if order.quantity <= 10:
-                #     order.shipping = 5
-                # elif order.quantity <= 20:
-                #     order.shipping = 6.5
-                # elif order.quantity <= 30:
-                #     order.shipping = 15.6
-                # else:
-                #     order.shipping = 18
-                ###################
-                
             if not debug:
                 upload_orders_data(uploading_orders)
 
