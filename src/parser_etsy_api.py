@@ -10,9 +10,9 @@ from api.parser import update_parser_status_by_id
 from configs.env import LOG_FILE
 from constants.status import ParserStatus
 from etsy_api.orders import get_all_orders_by_shop_id
+from schemes.upload_order import UploadingOrderData, OrderData
 from utils.format_order_data import format_order_data
 from utils.parser_shops_data import get_parser_shops_data
-from schemes.upload_order import UploadingOrderData, OrderData
 
 log.add(
     LOG_FILE,
