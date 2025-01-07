@@ -108,7 +108,7 @@ def process_single_shop(shop):
         offset += 100
 
         if offset > 200:
-            if now_hour < 20 and weekday in (5, 6):
+            if now_hour == 20 and weekday in (5, 6):
                 continue
             break
 
