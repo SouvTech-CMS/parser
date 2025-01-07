@@ -107,7 +107,7 @@ def process_single_shop(shop):
 
         offset += 100
 
-        if offset > 200 and now_hour < 20 and (weekday != 6 or weekday != 5):
+        if offset > 200 and now_hour < 20 and weekday not in (5, 6):
             break
     if shop_error:
         log.error(f"Shop {shop.shop_id} - {shop.shop_name} parsed with error.")
