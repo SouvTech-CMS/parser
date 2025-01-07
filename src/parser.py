@@ -25,7 +25,6 @@ log.add(
 
 # Every 2 hours
 PARSER_WAIT_TIME_IN_SECONDS = 60 * 60 * 2
-debug = True
 
 
 def etsy_api_parser():
@@ -40,11 +39,10 @@ def etsy_api_parser():
         log.info(
             f"Updating parser {shop.parser_id} status to {ParserStatus.PARSING}..."
         )
-        if not debug:
-            update_parser_status_by_id(
-                parser_id=shop.parser_id,
-                status=ParserStatus.PARSING,
-            )
+        update_parser_status_by_id(
+            parser_id=shop.parser_id,
+            status=ParserStatus.PARSING,
+        )
 
         log.success(f"Parser status updated.")
 
@@ -97,19 +95,7 @@ def etsy_api_parser():
                     )
                 )
 
-            if not debug:
-                upload_orders_data(uploading_orders)
-
-            else:
-                print("Uploading data to file")
-                with open("debug_data.json", "w", encoding="utf-8") as f:
-                    json.dump(
-                        uploading_orders.model_dump(),
-                        f,
-                        indent=4,
-                        ensure_ascii=False,
-                    )
-                return
+            upload_orders_data(uploading_orders)
 
             offset += 100
 
