@@ -23,8 +23,8 @@ log.add(
     serialize=True,
 )
 
-# Every 2 hours
-PARSER_WAIT_TIME_IN_SECONDS = 60 * 60 * 2
+# Every 30 minutes
+PARSER_WAIT_TIME_IN_SECONDS = 60 * 30
 
 
 def etsy_api_parser():
@@ -94,8 +94,20 @@ def etsy_api_parser():
                         order_items=goods_in_order,
                     )
                 )
-
-            upload_orders_data(uploading_orders)
+            number_of_attempts = 0
+            while number_of_attempts < 10:
+                res = upload_orders_data(uploading_orders)
+                if res:
+                    break
+                number_of_attempts += 1
+            if number_of_attempts == 10:
+                log.critical(f"Some error on sending info to backend")
+                update_parser_status_by_id(
+                    parser_id=shop.parser_id,
+                    status=ParserStatus.ETSY_API_ERROR,
+                )
+                shop_error = True
+                break
 
             offset += 100
 
