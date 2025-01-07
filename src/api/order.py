@@ -7,15 +7,11 @@ from schemes.upload_order import UploadingOrderData
 
 
 def upload_orders_data(orders: UploadingOrderData) -> bool:
-    try:
-        response = req.post(
-            f"{API_URL}/parser/orders/upload/",
-            headers=authorization().model_dump(),
-            json=orders.model_dump(),
-        )
-    except Exception as e:
-        log.error(f"Some critical exception on uploading orders\n\t{e}")
-        return upload_orders_data(orders)
+    response = req.post(
+        f"{API_URL}/parser/orders/upload/",
+        headers=authorization().model_dump(),
+        json=orders.model_dump(),
+    )
 
     if response.status_code != 200:
         log.error(
