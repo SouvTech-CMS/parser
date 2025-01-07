@@ -36,7 +36,7 @@ def format_order_data(
     # Getting order city and state ordered from
     city = City()
     try:
-        city = City(name=order["city"], state=order["state"])
+        city = City(name=order["city"], state=order["state"], country=order["country_iso"])
     except Exception:
         pass
     # Getting client info
