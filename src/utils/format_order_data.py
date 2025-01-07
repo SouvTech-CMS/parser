@@ -27,10 +27,10 @@ def format_order_data(
 
     # Getting order shipping info
     _shipping_info = order["shipments"]
-    shipping_id = ""
+    receipt_shipping_id = ""
     tracking_code = ""
     if len(_shipping_info):
-        shipping_id = str(_shipping_info[0]["receipt_shipping_id"])
+        receipt_shipping_id = str(_shipping_info[0]["receipt_shipping_id"])
         tracking_code = str(_shipping_info[0]["tracking_code"])
 
     # Getting order city and state ordered from
@@ -43,7 +43,7 @@ def format_order_data(
     client = Client()
     try:
         client = Client(
-            shop_client_id=str(order["buyer_user_id"]),
+            user_marketplace_id=str(order["buyer_user_id"]),
             name=order["name"],
             email=order["buyer_email"]
         )
@@ -91,7 +91,7 @@ def format_order_data(
         quantity=full_items_quantity,
         buyer_paid=buyer_paid,
         tax=tax_amount,
-        shipping_id=shipping_id,
+        receipt_shipping_id=receipt_shipping_id,
         tracking_code=tracking_code,
     )
 

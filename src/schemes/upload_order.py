@@ -14,4 +14,5 @@ class OrderData(BaseModel):
 
 class UploadingOrderData(BaseModel):
     shop_id: int
+    is_full_data_updating: bool | None = None
     orders_data: list[OrderData]

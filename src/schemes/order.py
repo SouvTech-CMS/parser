@@ -8,5 +8,5 @@ class Order(BaseModel):
     quantity: int | None = None
     buyer_paid: float | None = None
     tax: float | None = None
-    shipping_id: str | None = None
+    receipt_shipping_id: str | None = None
     tracking_code: str | None = None
