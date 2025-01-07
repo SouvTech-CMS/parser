@@ -114,25 +114,26 @@ def process_single_shop(shop):
                 status=ParserStatus.ETSY_API_ERROR,
             )
             shop_error = True
+        offset += 100
 
         if shop_error:
-            log.success(f"Shop {shop.shop_id} - {shop.shop_name} parsed with error.")
+            log.error(f"Shop {shop.shop_id} - {shop.shop_name} parsed with error.")
             return
 
-        log.info(
-            f"Updating parser {shop.parser_id} status to {ParserStatus.OK_AND_WAIT}..."
-        )
+    log.info(
+        f"Updating parser {shop.parser_id} status to {ParserStatus.OK_AND_WAIT}..."
+    )
 
-        update_parser_status_by_id(
-            parser_id=shop.parser_id,
-            status=ParserStatus.OK_AND_WAIT,
-            last_parsed=datetime.now().timestamp(),
-        )
+    update_parser_status_by_id(
+        parser_id=shop.parser_id,
+        status=ParserStatus.OK_AND_WAIT,
+        last_parsed=datetime.now().timestamp(),
+    )
 
-        log.success(f"Parser status updated.")
-        log.success(f"Shop {shop.shop_id} - {shop.shop_name} parsed.")
-        end_time_shop = datetime.now()
-        log.info(f"Shop parsing time: {end_time_shop - start_time_shop}")
+    log.success(f"Parser status updated.")
+    log.success(f"Shop {shop.shop_id} - {shop.shop_name} parsed.")
+    end_time_shop = datetime.now()
+    log.info(f"Shop parsing time: {end_time_shop - start_time_shop}")
 
     log.success(
         f"Parsing finished, wait {PARSER_WAIT_TIME_IN_SECONDS} seconds to repeat."

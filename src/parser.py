@@ -110,7 +110,7 @@ def process_single_shop(shop):
         if offset > 200 and now_hour < 20 and (weekday != 6 or weekday != 5):
             break
     if shop_error:
-        log.success(f"Shop {shop.shop_id} - {shop.shop_name} parsed with error.")
+        log.error(f"Shop {shop.shop_id} - {shop.shop_name} parsed with error.")
         return
     log.info(
         f"Updating parser {shop.parser_id} status to {ParserStatus.OK_AND_WAIT}..."
