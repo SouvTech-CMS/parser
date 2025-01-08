@@ -94,7 +94,7 @@ def process_single_shop(shop):
 
 		# res = upload_orders_data(uploading_orders)
 		with open("test_data.json", "w") as f:
-			json.dump(uploading_orders, f)
+			json.dump(uploading_orders.model_dump(), f)
 
 		return
 
