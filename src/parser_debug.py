@@ -143,10 +143,5 @@ def etsy_api_parser():
 
 
 if __name__ == "__main__":
-	while True:
-		try:
-			etsy_api_parser()
-			time.sleep(PARSER_WAIT_TIME_IN_SECONDS)
-		except Exception as e:
-			log.error(f"Error on fetching orders {e}")
-			time.sleep(900)
+	shops_data = get_parser_shops_data()
+	process_single_shop(shops_data[1])
