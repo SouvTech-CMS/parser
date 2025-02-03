@@ -9,6 +9,7 @@ from api.order import upload_orders_data
 from api.parser import update_parser_status_by_id
 from configs.env import LOG_FILE
 from constants.status import ParserStatus
+from etsy_api.get_etsy_api import get_etsy_api
 from etsy_api.orders import get_all_orders_by_shop_id
 from schemes.upload_order import UploadingOrderData, OrderData
 from utils.format_order_data import format_order_data
@@ -135,7 +136,8 @@ def process_single_shop(shop):
 
 def etsy_api_parser():
     shops_data = get_parser_shops_data()
-
+    for shop in shops_data:
+        etsy_api = get_etsy_api(int(shop.etsy_shop_id))
     # Используем ThreadPoolExecutor для параллельной обработки
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         # Запускаем обработку каждого магазина в отдельном потоке
