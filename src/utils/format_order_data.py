@@ -1,10 +1,10 @@
+import json
 from datetime import datetime
-from loguru import logger as log
-from schemes.city import City
 
+from schemes.city import City
+from schemes.client import Client
 from schemes.order import Order
 from schemes.order_item import GoodInOrder
-from schemes.client import Client
 
 
 def format_order_data(
@@ -36,7 +36,11 @@ def format_order_data(
     # Getting order city and state ordered from
     city = City()
     try:
-        city = City(name=order["city"], state=order["state"], country=order["country_iso"])
+        city = City(
+            name=order["city"],
+            state=order["state"],
+            country=order["country_iso"],
+        )
     except Exception:
         pass
     # Getting client info
@@ -57,15 +61,29 @@ def format_order_data(
         full_items_quantity += quantity
         # Name of good
         uniquename: str = trans["sku"]
-        # Getting all aditional engraving info
-        engraving_info: str = "["
+        # Transaction ID
+        listing_id: int = trans.get("listing_id")
+        # Product ID
+        product_id: int = trans.get("product_id")
+        # Transaction Type
+        transaction_type: str = trans.get("transaction_type")
+
+        # Getting all additional engraving info
+        engraving_info: dict = {}
         for variation in trans["variations"]:
-            engraving_info += "{"
-            engraving_info += "'{name}': '{value}'".format(
-                name=variation["formatted_name"], value=variation["formatted_value"]
-            )
-            engraving_info += "}, "
-        engraving_info = engraving_info.rstrip(", ") + "]"
+            variation_name = variation.get("formatted_name")
+            variation_value = variation.get("formatted_value")
+
+            engraving_info_item: dict = {
+                f"{variation_name}": f"{variation_value}",
+                "listing_id": listing_id,
+                "product_id": product_id,
+                "transaction_type": transaction_type,
+            }
+            engraving_info.update(engraving_info_item)
+
+        # Convert obj to str
+        engraving_info_str = json.dumps(engraving_info)
 
         # Amount of item
         price = (trans["price"]["amount"] / trans["price"]["divisor"]) * quantity
@@ -76,7 +94,7 @@ def format_order_data(
                 uniquename=uniquename,
                 quantity=quantity,
                 amount=amount,
-                engraving_info=engraving_info,
+                engraving_info=engraving_info_str,
             )
         )
 
