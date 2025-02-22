@@ -136,8 +136,8 @@ def process_single_shop(shop):
 
 def etsy_api_parser():
     shops_data = get_parser_shops_data()
-    for shop in shops_data:
-        etsy_api = get_etsy_api(int(shop.etsy_shop_id))
+    # for shop in shops_data:
+    #     etsy_api = get_etsy_api(shop.shop_id)
     # Используем ThreadPoolExecutor для параллельной обработки
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         # Запускаем обработку каждого магазина в отдельном потоке
@@ -149,6 +149,7 @@ def etsy_api_parser():
             if future.exception():
                 log.error(f"Error in thread: {future.exception()}")
     log.success(f"Parsed all shops waiting {PARSER_WAIT_TIME_IN_SECONDS} to repeat")
+
 
 # TODO: сделать чтобы файлы с кредами не писались в файл в многопотоке
 
