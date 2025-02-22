@@ -150,6 +150,7 @@ def etsy_api_parser():
                 log.error(f"Error in thread: {future.exception()}")
     log.success(f"Parsed all shops waiting {PARSER_WAIT_TIME_IN_SECONDS} to repeat")
 
+# TODO: сделать чтобы файлы с кредами не писались в файл в многопотоке
 
 if __name__ == "__main__":
     while True:
