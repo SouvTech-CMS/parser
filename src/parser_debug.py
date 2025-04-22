@@ -27,10 +27,11 @@ log.add(
 # Every 30 minutes
 PARSER_WAIT_TIME_IN_SECONDS = 60 * 30
 
+EXCEL_FILE = "data/check_point.xlsx"
+
+
 
 def process_single_shop(shop):
-	now_hour = datetime.now().hour
-
 	shop_error = False
 
 	start_time_shop = datetime.now()
@@ -47,6 +48,7 @@ def process_single_shop(shop):
 	that_month = True
 	offset = 0
 	date = datetime.now() - timedelta(days=30)
+	count = 0 # for excel check_point
 	weekday = datetime.now().weekday()
 	##########################
 
