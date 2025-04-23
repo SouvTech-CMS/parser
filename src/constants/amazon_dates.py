@@ -9,4 +9,4 @@ EARLIEST_DATE = datetime(2024, 1, 1, tzinfo=timezone.utc).isoformat().replace("+
 CURRENT_DATE=datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
 
 #last month date
-LAST_MONTH =  (datetime.now(timezone.utc) - timedelta(30)).isoformat().replace("+00:00", "Z")
+LAST_MONTH_DATE =  (datetime.now(timezone.utc) - timedelta(30)).isoformat().replace("+00:00", "Z")

@@ -3,8 +3,6 @@ import json
 import pprint
 from datetime import datetime, timedelta
 
-from loguru import logger as log
-
 from api.parser import update_parser_status_by_id
 from constants.status import ParserStatus
 from etsy_api.orders import get_all_orders_by_shop_id
@@ -13,6 +11,19 @@ from utils.format_order_data import format_order_data
 from utils.parser_shops_data import get_parser_shops_data
 from utils.excel.write_each_row import write_to_excel
 from configs import settings
+from amazon_api.get_amazon_api import OrderClient
+
+
+
+from sp_api.util import throttle_retry, load_all_pages
+
+from configs import settings
+from constants.amazon_credentials import CREDENTIALS_ARG
+from constants.amazon_dates import LAST_MONTH_DATE, EARLIEST_DATE
+from utils.safe_ratelimit_amazon import safe_rate_limit
+from utils.format_datetime import is_iso_utc_z_format
+from log.logger import logger
+
 
 log.add(
 	settings.LOG_FILE,
@@ -30,20 +41,22 @@ CREATED_AFTER = datetime(2024, 1, 1).isoformat().replace("+00:00", 'Z')
 EXCEL_FILE = "data/check_point.xlsx" #temporaty
 
 
+#TODO link on update refresh token don't forget!!!!
 
 def process_single_shop(shop):
 
 	# Initializing constants
 	shop_error = False
 	start_time_shop = datetime.now()
+	order_cl = OrderClient(log=logger)
 
 	offset = 0
-	date = datetime.now() - timedelta(days=30) # will using in CREATED_AFTER flag
+	created_after = EARLIEST_DATE
 	# weekday = datetime.now().weekday()
 	##########################
 
-	log.info(f"Parsing shop {shop.shop_id} - {shop.shop_name}...")
-	log.info(
+	logger.info(f"Parsing shop {shop.shop_id} - {shop.shop_name}...")
+	logger.info(
 		f"Updating parser {shop.parser_id} status to {ParserStatus.PARSING}..."
 	)
 
@@ -52,23 +65,30 @@ def process_single_shop(shop):
 		status=ParserStatus.PARSING,
 	)
 
-	log.success(f"Parser status updated.")
+	logger.success(f"Parser status updated.")
 
-	while that_month:
-		uploading_orders = UploadingOrderData(shop_id=shop.shop_id, orders_data=[])
 
-		log.info(
+	uploading_orders = UploadingOrderData(shop_id=shop.shop_id, orders_data=[])
+
+
+	#loop
+	for page_orders in order_cl.load_all_orders(CreatedAfter=created_after):
+		"""Every 100 orders after <CreatedAfter>"""
+
+		logger.info(
 			f"Fetching orders from {offset} to {offset + 100} from shop {shop.shop_name}..."
 		)
+
+
 		try:
 			shop_orders, _ = get_all_orders_by_shop_id(
-				etsy_shop_id=int(shop.etsy_shop_id),
-				shop_id=shop.shop_id,
-				limit=100,
-				offset=offset,
+			etsy_shop_id=int(shop.etsy_shop_id),
+			shop_id=shop.shop_id,
+			limit=100,
+			offset=offset,
 			)
 		except Exception as e:
-			log.critical(f"Some error in getting info from ETSY API: {e}")
+			logger.critical(f"Some error in getting info from ETSY API: {e}")
 			pprint.pprint(e)
 			update_parser_status_by_id(
 				parser_id=shop.parser_id,
@@ -76,6 +96,10 @@ def process_single_shop(shop):
 			)
 			shop_error = True
 			break
+
+
+
+
 
 		# Get order details and split for creating and updating
 		for shop_order in shop_orders:
@@ -106,9 +130,9 @@ def process_single_shop(shop):
 			break
 
 	if shop_error:
-		log.error(f"Shop {shop.shop_id} - {shop.shop_name} parsed with error.")
+		logger.error(f"Shop {shop.shop_id} - {shop.shop_name} parsed with error.")
 		return
-	log.info(
+	logger.info(
 		f"Updating parser {shop.parser_id} status to {ParserStatus.OK_AND_WAIT}..."
 	)
 
@@ -118,10 +142,10 @@ def process_single_shop(shop):
 		last_parsed=datetime.now().timestamp(),
 	)
 
-	log.success(f"Parser status updated.")
-	log.success(f"Shop {shop.shop_id} - {shop.shop_name} parsed.")
+	logger.success(f"Parser status updated.")
+	logger.success(f"Shop {shop.shop_id} - {shop.shop_name} parsed.")
 	end_time_shop = datetime.now()
-	log.info(
+	logger.info(
 		f"Shop  {shop.shop_id} - {shop.shop_name} parsing time: {end_time_shop - start_time_shop}"
 	)
 
@@ -138,8 +162,8 @@ def etsy_api_parser():
 		# Проверяем, были ли исключения
 		for future in futures:
 			if future.exception():
-				log.error(f"Error in thread: {future.exception()}")
-	log.success(f"Parsed all shops waiting {PARSER_WAIT_TIME_IN_SECONDS} to repeat")
+				logger.error(f"Error in thread: {future.exception()}")
+	logger.success(f"Parsed all shops waiting {PARSER_WAIT_TIME_IN_SECONDS} to repeat")
 
 
 if __name__ == "__main__":
