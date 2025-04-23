@@ -1,28 +1,24 @@
 from sp_api.api import Orders
 from sp_api.util import throttle_retry, load_all_pages
-from datetime import datetime, timezone
-from loguru import logger
 
 from configs import settings
+from constants.amazon_credentials import CREDENTIALS_ARG
+from constants.amazon_dates import LAST_MONTH
 from utils.safe_ratelimit_amazon import safe_rate_limit
+from utils.format_datetime import is_iso_utc_z_format
 
-CREDENTIALS = dict(
-    lwa_app_id=settings.LWA_APP_ID,
-    lwa_client_secret=settings.LWA_CLIENT_SECRET
-)
 
-LAST_UPDATE_BEFORE=datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
-#first order was offer in 2024/2/17
-CREATED_AFTER = datetime(2024, 1, 1).isoformat().replace("+00:00", 'Z')
 LIMIT=100
 
 
 
 class OrderClient:
-    def __init__(self):
-        self._order_cl = Orders(credentials=CREDENTIALS,
-                                refresh_token=settings.SP_API_REFRESH_TOKEN)
+    def __init__(self, log):
+        self._order_cl = Orders()
         self._expanded_orders = []
+        self.log = log
+
+
 
 
     @throttle_retry()
@@ -45,8 +41,17 @@ class OrderClient:
         return items
 
 
-    def get_orders(self):
-        for page in self._load_all_orders(CreatedAfter=CREATED_AFTER):
+    def get_orders(self, created_after: str):
+        """
+        Args:
+        created_after: iso6108 format with Z
+        """
+
+        if not is_iso_utc_z_format(created_after):
+            created_after = LAST_MONTH
+
+        for page in self._load_all_orders(CreatedAfter=created_after):
+
             for order in page.payload.get('Orders'):
                 _order_id = order["AmazonOrderId"]
 
