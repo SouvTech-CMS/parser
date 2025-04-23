@@ -5,10 +5,4 @@ class ShopData(BaseModel):
     parser_id: int
     shop_id: int
     shop_name: str
-    # TODO delete param shop cookie
-    shop_cookie: str
-    shop_token: str
-    shop_refresh_token: str
-    expiry: float
-    etsy_shop_id: str
-    shop_auth_code: str
+    amazon_shop_id: str

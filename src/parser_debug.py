@@ -1,22 +1,21 @@
 import concurrent.futures
 import json
 import pprint
-import time
 from datetime import datetime, timedelta
 
 from loguru import logger as log
 
-from api.order import upload_orders_data
 from api.parser import update_parser_status_by_id
-from configs.env import LOG_FILE
 from constants.status import ParserStatus
 from etsy_api.orders import get_all_orders_by_shop_id
 from schemes.upload_order import UploadingOrderData, OrderData
 from utils.format_order_data import format_order_data
 from utils.parser_shops_data import get_parser_shops_data
+from utils.excel.write_each_row import write_to_excel
+from configs import settings
 
 log.add(
-	LOG_FILE,
+	settings.LOG_FILE,
 	format="{time} {level} {message}",
 	level="DEBUG",
 	rotation="100 MB",
@@ -26,31 +25,34 @@ log.add(
 
 # Every 30 minutes
 PARSER_WAIT_TIME_IN_SECONDS = 60 * 30
+CREATED_AFTER = datetime(2024, 1, 1).isoformat().replace("+00:00", 'Z')
 
-EXCEL_FILE = "data/check_point.xlsx"
+EXCEL_FILE = "data/check_point.xlsx" #temporaty
 
 
 
 def process_single_shop(shop):
-	shop_error = False
 
+	# Initializing constants
+	shop_error = False
 	start_time_shop = datetime.now()
+
+	offset = 0
+	date = datetime.now() - timedelta(days=30) # will using in CREATED_AFTER flag
+	# weekday = datetime.now().weekday()
+	##########################
+
 	log.info(f"Parsing shop {shop.shop_id} - {shop.shop_name}...")
-	log.info(f"Updating parser {shop.parser_id} status to {ParserStatus.PARSING}...")
+	log.info(
+		f"Updating parser {shop.parser_id} status to {ParserStatus.PARSING}..."
+	)
+
 	update_parser_status_by_id(
 		parser_id=shop.parser_id,
 		status=ParserStatus.PARSING,
 	)
 
 	log.success(f"Parser status updated.")
-
-	# Initializing constants
-	that_month = True
-	offset = 0
-	date = datetime.now() - timedelta(days=30)
-	count = 0 # for excel check_point
-	weekday = datetime.now().weekday()
-	##########################
 
 	while that_month:
 		uploading_orders = UploadingOrderData(shop_id=shop.shop_id, orders_data=[])
@@ -81,9 +83,6 @@ def process_single_shop(shop):
 			order, goods_in_order, day, month, client, city = format_order_data(
 				order=shop_order,
 			)
-			if day <= date.day and month == date.month:
-				that_month = False
-				break
 
 			uploading_orders.orders_data.append(
 				OrderData(
@@ -98,7 +97,6 @@ def process_single_shop(shop):
 		with open("test_data.json", "w") as f:
 			json.dump(uploading_orders.model_dump(), f)
 
-		return
 
 		offset += 100
 
@@ -146,4 +144,4 @@ def etsy_api_parser():
 
 if __name__ == "__main__":
 	shops_data = get_parser_shops_data()
-	process_single_shop(shops_data[1])
+	process_single_shop(shops_data[2])

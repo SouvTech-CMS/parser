@@ -21,5 +21,6 @@ class Settings(BaseSettings):
     LWA_APP_ID: str
     LWA_CLIENT_SECRET: str
     SP_API_REFRESH_TOKEN: str
+    LOG_FILE: str
 
 
