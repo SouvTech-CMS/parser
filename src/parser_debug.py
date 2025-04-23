@@ -25,14 +25,6 @@ from utils.format_datetime import is_iso_utc_z_format
 from log.logger import logger
 
 
-log.add(
-	settings.LOG_FILE,
-	format="{time} {level} {message}",
-	level="DEBUG",
-	rotation="100 MB",
-	compression="zip",
-	serialize=True,
-)
 
 # Every 30 minutes
 PARSER_WAIT_TIME_IN_SECONDS = 60 * 30
@@ -80,6 +72,7 @@ def process_single_shop(shop):
 		)
 
 
+		#TODO make try ex
 		try:
 			shop_orders, _ = get_all_orders_by_shop_id(
 			etsy_shop_id=int(shop.etsy_shop_id),
