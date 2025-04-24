@@ -12,9 +12,6 @@ def _delay_execution(*,
         return 1 / float(rate_limit)  # for dynamically rate limit
     return float(throttle_by_seconds)
 
-def _check_next_page():
-
-
 
 def safe_rate_limit(throttle_by_seconds: int = 1,
                     header_limit: bool = False):

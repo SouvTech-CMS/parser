@@ -26,7 +26,10 @@ def _format_good_in_order(*,
     """fill good_in_order obj"""
     item_obj.uniquename = item["SellerSKU"]
     item_obj.quantity = item["QuantityOrdered"]
-    item_obj.amount = (item["ItemPrice"]["Amount"] * item["QuantityOrdered"]) - item["PromotionDiscount"]["Amount"]
+    if item.get("ItemPrice") and item.get("PromotionDiscount"):
+        item_obj.amount = (
+            (float(item["ItemPrice"]["Amount"]) * item["QuantityOrdered"]) - float(item["PromotionDiscount"]["Amount"])
+        )
     item_obj.engraving_info = item["Title"]  # чё надо?
 
 
@@ -34,15 +37,19 @@ def _format_client(*,
                    order: dict,
                    client_obj: Client):
     # TODO Другого не дано :(
-    client_obj.email = order["BuyerInfo"]["BuyerEmail"]
+    buyer_info = order.get("BuyerInfo")
+    if buyer_info:
+        client_obj.email = buyer_info["BuyerEmail"]
 
 
 def _format_city(*,
                  order: dict,
                  city_obj: City):
-    city_obj.name = order["ShippingAddress"]["City"]
-    city_obj.state = order["ShippingAddress"]["StateOrRegion"]
-    city_obj.country = order["ShippingAddress"]["CountryCode"]
+    shipping_address = order.get("ShippingAddress")
+    if shipping_address:
+        city_obj.name = shipping_address["City"]
+        city_obj.state = shipping_address["StateOrRegion"]
+        city_obj.country = shipping_address["CountryCode"]
 
 
 def format_order_data(*,
@@ -63,7 +70,11 @@ def format_order_data(*,
 
         # calculate tax and quantity for order
         order_obj.quantity += good_in_order.quantity
-        order_obj.tax += (good_in_order.quantity * item["ItemTax"]["Amount"]) - item["PromotionDiscountTax"]["Amount"]
+
+        if item.get("ItemTax") and item.get("PromotionDiscountTax"):
+            order_obj.tax += (
+                (good_in_order.quantity * float(item["ItemTax"]["Amount"])) - float(item["PromotionDiscountTax"]["Amount"])
+            )
 
         order_items.append(good_in_order)
 

@@ -42,9 +42,6 @@ class OrderClient:
         return self.order_api.get_order_items(order_id=order_id, **kwargs)
 
 
-#TODO format orders and items
-
-
     def get_orders_with_items(self, page: ApiResponse) -> list[OrderData] | None:
         try:
             for order in page.payload.get('Orders'):
@@ -62,4 +59,5 @@ class OrderClient:
                 status=ParserStatus.OK_AND_WAIT
             )
             return None
+
         return self._list_orders_data

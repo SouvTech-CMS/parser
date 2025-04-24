@@ -12,10 +12,7 @@ from constants.amazon_dates import LAST_MONTH_DATE, EARLIEST_DATE
 from log.logger import logger
 
 
-# Every 30 minutes
-PARSER_WAIT_TIME_IN_SECONDS = 60 * 30
-
-EXCEL_FILE = "data/check_point.xlsx" #temporaty
+EXCEL_FILE = "data/check_point.xlsx" #temporary
 
 
 #TODO link on update refresh token don't forget!!!!
@@ -50,7 +47,6 @@ def process_single_shop(shop: ShopData):
 			f"Fetching orders from {offset} to {offset + 100} from shop {shop.shop_name}..."
 		)
 
-
 		orders_data = order_cl.get_orders_with_items(page=page_orders)
 		if orders_data is None:
 			shop_error = True
@@ -60,7 +56,6 @@ def process_single_shop(shop: ShopData):
 
 		with open("test_data.json", "w") as f:
 			json.dump(uploading_orders.model_dump(), f)
-
 
 		offset += 100
 
@@ -88,4 +83,4 @@ def process_single_shop(shop: ShopData):
 
 if __name__ == "__main__":
 	shops_data = get_parser_shops_data()
-	process_single_shop(shops_data[2])
+	process_single_shop(shops_data[0]) # TODO пофиксить хуйню с json и магазинами

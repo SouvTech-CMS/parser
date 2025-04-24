@@ -20,15 +20,18 @@ def update_parser_status_by_id(
         response = req.put(
             f"{settings.API_URL}/parser/", headers=authorization().model_dump(), json=data
         )
-    except Exception as e:
-        return update_parser_status_by_id(parser_id, status)
 
-    if response.status_code != 200:
+        if response.status_code != 200:
+            raise ValueError(f"Unexpected status code: {response.status_code}")
+
+    except ValueError:
         logger.error(
             f"""
-            Some error when updating parser status.
-            Parser ID: {parser_id}
-            Status code: {response.status_code}
-            Details: {response.json()['detail']}
-        """
+                Some error when updating parser status.
+                Parser ID: {parser_id}
+                Status code: {response.status_code}
+                Details: {response.json()['detail']}
+            """
         )
+    except Exception as e:
+        logger.error(f"Some wrong with parser status updating = {e}")
