@@ -1,116 +1,75 @@
 import json
 from datetime import datetime
 
-from schemes.city import City
-from schemes.client import Client
 from schemes.order import Order
+from schemes.client import Client
+from schemes.city import City
 from schemes.order_item import GoodInOrder
+from schemes.upload_order import OrderData
+from utils.format_datetime import iso_to_simple
 
 
-def format_order_data(
-    order: dict,
-):
-    order_id = order["receipt_id"]
-    # Good in orders
+def _format_order(*,
+                  order: dict, order_obj: Order):
+    """earliest fill order_obj"""
+    order_obj.buyer_paid = None
+    order_obj.order_id = order["AmazonOrderId"]
+    order_obj.status = order["OrderStatus"]  # TODO может отличаться от бэка
+    order_obj.date = iso_to_simple(order["PurchaseDate"])  # formated_date = f"{day}.{month}.{year}"
+    order_obj.quantity = 0
+    order_obj.tax = 0
+
+
+def _format_good_in_order(*,
+                          item: dict,
+                          item_obj: GoodInOrder):
+    """fill good_in_order obj"""
+    item_obj.uniquename = item["SellerSKU"]
+    item_obj.quantity = item["QuantityOrdered"]
+    item_obj.amount = (item["ItemPrice"]["Amount"] * item["QuantityOrdered"]) - item["PromotionDiscount"]["Amount"]
+    item_obj.engraving_info = item["Title"]  # чё надо?
+
+
+def _format_client(*,
+                   order: dict,
+                   client_obj: Client):
+    # TODO Другого не дано :(
+    client_obj.email = order["BuyerInfo"]["BuyerEmail"]
+
+
+def _format_city(*,
+                 order: dict,
+                 city_obj: City):
+    city_obj.name = order["ShippingAddress"]["City"]
+    city_obj.state = order["ShippingAddress"]["StateOrRegion"]
+    city_obj.country = order["ShippingAddress"]["CountryCode"]
+
+
+def format_order_data(*,
+                      order: dict,
+                      items: list[dict]) -> OrderData:
+    order_obj = Order()
+    client_obj = Client()
+    city_obj = City()
     order_items = []
-    order_created_at = datetime.fromtimestamp(order["created_timestamp"])
-    ###########
-    day = order_created_at.day
-    month = order_created_at.month
-    year = order_created_at.year
-    ###########
-    order_status = order["status"]
-    # Order date
-    formated_date = f"{day}.{month}.{year}"
-    # Full quantity of items in order
-    full_items_quantity = 0
 
-    # Getting order shipping info
-    _shipping_info = order["shipments"]
-    receipt_shipping_id = ""
-    tracking_code = ""
-    if len(_shipping_info):
-        receipt_shipping_id = str(_shipping_info[0]["receipt_shipping_id"])
-        tracking_code = str(_shipping_info[0]["tracking_code"])
+    _format_order(order=order, order_obj=order_obj)
+    _format_client(order=order, client_obj=client_obj)
+    _format_city(order=order, city_obj=city_obj)
 
-    # Getting order city and state ordered from
-    city = City()
-    try:
-        city = City(
-            name=order["city"],
-            state=order["state"],
-            country=order["country_iso"],
-        )
-    except Exception:
-        pass
-    # Getting client info
-    client = Client()
-    try:
-        client = Client(
-            user_marketplace_id=str(order["buyer_user_id"]),
-            name=order["name"],
-            email=order["buyer_email"]
-        )
-    except Exception:
-        pass
-    # Creating goods and good in order objects
-    for trans in order["transactions"]:
-        # Quantity of item
-        quantity = trans["quantity"]
-        # Full quantity of order items
-        full_items_quantity += quantity
-        # Name of good
-        uniquename: str = trans["sku"]
-        # Transaction ID
-        listing_id: int = trans.get("listing_id")
-        # Product ID
-        product_id: int = trans.get("product_id")
-        # Transaction Type
-        transaction_type: str = trans.get("transaction_type")
+    for item in items:
+        good_in_order = GoodInOrder()
+        _format_good_in_order(item=item, item_obj=good_in_order)
 
-        # Getting all additional engraving info
-        engraving_info: dict = {}
-        for variation in trans["variations"]:
-            variation_name = variation.get("formatted_name")
-            variation_value = variation.get("formatted_value")
+        # calculate tax and quantity for order
+        order_obj.quantity += good_in_order.quantity
+        order_obj.tax += (good_in_order.quantity * item["ItemTax"]["Amount"]) - item["PromotionDiscountTax"]["Amount"]
 
-            engraving_info_item: dict = {
-                f"{variation_name}": f"{variation_value}",
-                "listing_id": listing_id,
-                "product_id": product_id,
-                "transaction_type": transaction_type,
-            }
-            engraving_info.update(engraving_info_item)
+        order_items.append(good_in_order)
 
-        # Convert obj to str
-        engraving_info_str = json.dumps(engraving_info)
-
-        # Amount of item
-        price = (trans["price"]["amount"] / trans["price"]["divisor"]) * quantity
-        amount = price - trans["buyer_coupon"]
-        #################
-        order_items.append(
-            GoodInOrder(
-                uniquename=uniquename,
-                quantity=quantity,
-                amount=amount,
-                engraving_info=engraving_info_str,
-            )
-        )
-
-    order_total = order["grandtotal"]
-    buyer_paid = order_total["amount"] / order_total["divisor"]
-    tax_total = order["total_tax_cost"]
-    tax_amount = tax_total["amount"] / tax_total["divisor"]
-    order = Order(
-        status=order_status,
-        order_id=str(order_id),
-        date=formated_date,
-        quantity=full_items_quantity,
-        buyer_paid=buyer_paid,
-        tax=tax_amount,
-        receipt_shipping_id=receipt_shipping_id,
-        tracking_code=tracking_code,
+    return OrderData(
+        order=order_obj,
+        client=client_obj,
+        city=city_obj,
+        order_items=order_items
     )
-
-    return order, order_items, day, month, client, city

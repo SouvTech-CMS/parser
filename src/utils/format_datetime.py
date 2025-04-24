@@ -8,3 +8,10 @@ def is_iso_utc_z_format(date_str):
         return dt.utcoffset().total_seconds() == 0
     except ValueError:
         return False
+
+
+def iso_to_simple(iso_str: str):
+    """iso8601 to dd.mm.YYYY"""
+    dt = datetime.strptime(iso_str, "%Y-%m-%dT%H:%M:%SZ")
+    return f"{dt.day:02d}.{dt.month:02d}.{dt.year}"
+

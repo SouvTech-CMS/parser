@@ -5,21 +5,23 @@ import pprint
 
 from configs import settings
 from constants.amazon_credentials import CREDENTIALS_ARG
-from constants.amazon_dates import LAST_MONTH_DATE
 from constants.status import ParserStatus
 from utils.safe_ratelimit_amazon import safe_rate_limit
-from utils.format_datetime import is_iso_utc_z_format
 from api.parser import update_parser_status_by_id
 from log.logger import logger
 from schemes.shop_data import ShopData
+from schemes.upload_order import OrderData
+from utils.format_order_data import format_order_data
 
 
 class OrderClient:
     def __init__(self, shop: ShopData):
-        self._expanded_orders = []
+        self.order_api = Orders(**CREDENTIALS_ARG)
+        self._list_orders_data = []
         self.shop = shop
 
-    def _get_all_items(self, order_id):
+
+    def _get_all_items(self, order_id) -> list:
         items = []
         for i_page in self._load_all_items(order_id=order_id):
             for item in i_page.payload.get("OrderItems"):
@@ -30,28 +32,28 @@ class OrderClient:
     @throttle_retry()
     @load_all_pages()
     def load_all_orders(self, **kwargs):
-        return self.get_orders(**kwargs)
+        return self.order_api.get_orders(**kwargs)
 
 
     @throttle_retry()
     @load_all_pages()
     @safe_rate_limit(header_limit=True)
     def _load_all_items(self, order_id, **kwargs):
-        return self._get_order_items(order_id=order_id, **kwargs)
+        return self.order_api.get_order_items(order_id=order_id, **kwargs)
 
 
+#TODO format orders and items
 
 
-
-    def get_orders(self, page: ApiResponse):
+    def get_orders_with_items(self, page: ApiResponse) -> list[OrderData] | None:
         try:
             for order in page.payload.get('Orders'):
                 _order_id = order["AmazonOrderId"]
-
-                self._expanded_orders.append({
-                    "Order_data": order,
-                    "Order_item_data": self._get_all_items(order_id=_order_id)
-                })
+                order_data = format_order_data(
+                    order=order,
+                    items=self._get_all_items(order_id=_order_id)
+                )
+                self._list_orders_data.append(order_data)
         except Exception as e:
             logger.critical(f"Some error in getting info from Amazon SP API: {e}")
             pprint.pprint(e)
@@ -59,6 +61,5 @@ class OrderClient:
                 parser_id=self.shop.parser_id,
                 status=ParserStatus.OK_AND_WAIT
             )
-            #TODO: retrurn shop_error
-
-        return self._expanded_orders
+            return None
+        return self._list_orders_data

@@ -72,43 +72,20 @@ def process_single_shop(shop):
 		)
 
 
-		#TODO make try ex
-		try:
-			shop_orders, _ = get_all_orders_by_shop_id(
-			etsy_shop_id=int(shop.etsy_shop_id),
-			shop_id=shop.shop_id,
-			limit=100,
-			offset=offset,
-			)
-		except Exception as e:
-			logger.critical(f"Some error in getting info from ETSY API: {e}")
-			pprint.pprint(e)
-			update_parser_status_by_id(
-				parser_id=shop.parser_id,
-				status=ParserStatus.ETSY_API_ERROR,
-			)
+		orders_data = order_cl.get_orders_with_items(page=page_orders)
+		if orders_data is None:
 			shop_error = True
 			break
 
-
-
-
-
-		# Get order details and split for creating and updating
-		for shop_order in shop_orders:
-
-			order, goods_in_order, day, month, client, city = format_order_data(
-				order=shop_order,
+		#TODO подготовить upload
+		uploading_orders.orders_data.append(
+			OrderData(
+				order=order,
+				client=client,
+				city=city,
+				order_items=goods_in_order,
 			)
-
-			uploading_orders.orders_data.append(
-				OrderData(
-					order=order,
-					client=client,
-					city=city,
-					order_items=goods_in_order,
-				)
-			)
+		)
 
 		# res = upload_orders_data(uploading_orders)
 		with open("test_data.json", "w") as f:
