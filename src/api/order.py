@@ -1,23 +1,28 @@
 import requests as req
-from loguru import logger as log
 
 from api.auth import authorization
-from configs.env import API_URL
+from configs import settings
 from schemes.upload_order import UploadingOrderData
 
+from log.logger import logger
+from utils.retry import retry
 
-def upload_orders_data(orders: UploadingOrderData) -> bool:
+
+@retry()
+def upload_orders_data(orders: UploadingOrderData):
     response = req.post(
-        f"{API_URL}/parser/orders/upload/",
+        f"{settings.API_URL}/parser/orders/upload/",
         headers=authorization().model_dump(),
         json=orders.model_dump(),
     )
 
-    if response.status_code != 200:
-        log.error(
+    if response.status_code != 200: # TODO поиграться с проверкой
+        logger.error(
             f"""
             Some error when uploading orders data, status code: {response.status_code}
         """
         )
-        return False
-    return True
+        response.raise_for_status()
+
+
+

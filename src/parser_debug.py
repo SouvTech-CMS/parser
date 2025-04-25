@@ -12,11 +12,6 @@ from constants.amazon_dates import LAST_MONTH_DATE, EARLIEST_DATE
 from log.logger import logger
 
 
-EXCEL_FILE = "data/check_point.xlsx" #temporary
-
-
-#TODO link on update refresh token don't forget!!!!
-
 def process_single_shop(shop: ShopData):
 
 	order_cl = OrderClient(shop=shop)
@@ -38,10 +33,10 @@ def process_single_shop(shop: ShopData):
 
 	logger.success(f"Parser status updated.")
 
-	uploading_orders = UploadingOrderData(shop_id=shop.shop_id, orders_data=[])
-
 	for page_orders in order_cl.load_all_orders(CreatedAfter=created_after):
 		"""Every 100 orders after <CreatedAfter>"""
+
+		uploading_orders = UploadingOrderData(shop_id=shop.shop_id, orders_data=[])
 
 		logger.info(
 			f"Fetching orders from {offset} to {offset + 100} from shop {shop.shop_name}..."

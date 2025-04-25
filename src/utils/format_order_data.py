@@ -36,7 +36,6 @@ def _format_good_in_order(*,
 def _format_client(*,
                    order: dict,
                    client_obj: Client):
-    # TODO Другого не дано :(
     buyer_info = order.get("BuyerInfo")
     if buyer_info:
         client_obj.email = buyer_info["BuyerEmail"]
