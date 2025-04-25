@@ -46,6 +46,7 @@ class OrderClient:
         try:
             for order in page.payload.get('Orders'):
                 _order_id = order["AmazonOrderId"]
+                pprint.pprint(f"formating order ID: {_order_id}")
                 order_data = format_order_data(
                     order=order,
                     items=self._get_all_items(order_id=_order_id)

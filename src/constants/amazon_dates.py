@@ -10,3 +10,6 @@ CURRENT_DATE=datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
 
 #last month date
 LAST_MONTH_DATE =  (datetime.now(timezone.utc) - timedelta(30)).isoformat().replace("+00:00", "Z")
+
+#last week date
+LAST_WEEK_DATE =  (datetime.now(timezone.utc) - timedelta(7)).isoformat().replace("+00:00", "Z")

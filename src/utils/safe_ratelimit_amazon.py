@@ -23,15 +23,12 @@ def safe_rate_limit(throttle_by_seconds: int = 1,
             if resp.next_token:
                 #excludes delay for several pages
                 return resp
-            logger.info(resp)
-            logger.info(f"в декораторе и прошёл первичную проверку....")
 
             sleep_time = _delay_execution(throttle_by_seconds=throttle_by_seconds,
                                  header_limit=header_limit,
                                  rate_limit=resp.rate_limit)
 
             if sleep_time:
-                logger.info(f"запуск слипа....{sleep_time}")
                 time.sleep(sleep_time)
             return resp
 

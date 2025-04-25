@@ -1,4 +1,4 @@
-import json
+import concurrent.futures
 from datetime import datetime
 
 from api.parser import update_parser_status_by_id
@@ -9,18 +9,13 @@ from schemes.upload_order import UploadingOrderData
 from utils.parser_shops_data import get_parser_shops_data
 from amazon_api.get_amazon_api import OrderClient
 
-from constants.amazon_dates import LAST_MONTH_DATE, EARLIEST_DATE
+from constants.amazon_dates import LAST_MONTH_DATE, EARLIEST_DATE, LAST_WEEK_DATE
 from log.logger import logger
 
-EXCEL_FILE = "data/check_point.xlsx"  # temporary
-RETRY_LIMIT = 10
-
-
-# TODO link on update refresh token don't forget!!!!
 
 def process_single_shop(shop: ShopData):
     order_cl = OrderClient(shop=shop)
-    created_after = EARLIEST_DATE
+    created_after = LAST_WEEK_DATE
     shop_error = False
     offset = 0
     start_time_shop = datetime.now()
@@ -54,7 +49,7 @@ def process_single_shop(shop: ShopData):
         uploading_orders.orders_data.extend(orders_data)
 
         try:
-            upload_orders_data(uploading_orders)
+            upload_orders_data(uploading_orders) # send data to backend
         except:
             logger.critical(f"Some error on sending info to backend")
             update_parser_status_by_id(
@@ -86,30 +81,23 @@ def process_single_shop(shop: ShopData):
     )
 
 
-#TODO this func ref
 def etsy_api_parser():
     shops_data = get_parser_shops_data()
 
-    # Используем ThreadPoolExecutor для параллельной обработки
+    # using ThreadPoolExecutor for parallel processing
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-        # Запускаем обработку каждого магазина в отдельном потоке
+        # Starting process for each shop in a separate thread
         futures = [executor.submit(process_single_shop, shop) for shop in shops_data]
-        # Ждем завершения всех задач
+        # Waiting for all tasks to complete
         concurrent.futures.wait(futures)
-        # Проверяем, были ли исключения
+        # checking for any exceptions
         for future in futures:
             if future.exception():
-                log.error(f"Error in thread: {future.exception()}")
-    log.success(f"Parsed all shops waiting {PARSER_WAIT_TIME_IN_SECONDS} to repeat")
+                logger.error(f"Error in thread: {future.exception()}")
 
 
-#TODO this func ref
 if __name__ == "__main__":
-
     try:
         etsy_api_parser()
-        time.sleep(PARSER_WAIT_TIME_IN_SECONDS)
-        time.sleep(900)
     except Exception as e:
-        log.error(f"Error on fetching orders {e}")
-        time.sleep(900)
+        logger.error(f"Error on fetching orders {e}")
