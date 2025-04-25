@@ -15,7 +15,7 @@ def _format_order(*,
     order_obj.buyer_paid = None
     order_obj.order_id = order["AmazonOrderId"]
     order_obj.status = order["OrderStatus"]  # TODO может отличаться от бэка
-    order_obj.date = iso_to_simple(order["PurchaseDate"])  # formated_date = f"{day}.{month}.{year}"
+    order_obj.date = iso_to_simple(order["PurchaseDate"])
     order_obj.quantity = 0
     order_obj.tax = 0
 
@@ -30,7 +30,7 @@ def _format_good_in_order(*,
         item_obj.amount = (
             (float(item["ItemPrice"]["Amount"]) * item["QuantityOrdered"]) - float(item["PromotionDiscount"]["Amount"])
         )
-    item_obj.engraving_info = item["Title"]  # чё надо?
+    item_obj.engraving_info = item["Title"]  # TODO чё надо?
 
 
 def _format_client(*,

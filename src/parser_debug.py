@@ -78,4 +78,4 @@ def process_single_shop(shop: ShopData):
 
 if __name__ == "__main__":
 	shops_data = get_parser_shops_data()
-	process_single_shop(shops_data[0]) # TODO пофиксить хуйню с json и магазинами
+	process_single_shop(shops_data[0])

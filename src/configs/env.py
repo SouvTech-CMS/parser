@@ -14,4 +14,6 @@ class Settings(BaseSettings):
     LOG_FILE: str
     DATA_FOLDER_PATH: str
 
-
+    @property
+    def SHOPS_DATA_FILE_PATH(self):
+        return f"{self.DATA_FOLDER_PATH}/shops/shops_amazon.json"
