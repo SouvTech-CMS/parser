@@ -17,3 +17,8 @@ class Settings(BaseSettings):
     @property
     def SHOPS_DATA_FILE_PATH(self):
         return f"{self.DATA_FOLDER_PATH}/shops/shops_amazon.json"
+
+
+    @property
+    def PARSER_ORDER_UPLOAD(self):
+        return f"{self.API_URL}/parser/orders/upload/"

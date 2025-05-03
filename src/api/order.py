@@ -12,7 +12,7 @@ from utils.retry import retry
 def upload_orders_data(orders: UploadingOrderData):
     logger.info("Posting data to backend...")
     response = req.post(
-        f"{settings.API_URL}/parser/orders/upload/",
+        url=settings.PARSER_ORDER_UPLOAD,
         headers=authorization().model_dump(),
         json=orders.model_dump(),
     )
