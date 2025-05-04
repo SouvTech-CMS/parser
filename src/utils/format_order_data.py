@@ -39,15 +39,14 @@ def _format_good_in_order(*,
             (float(item_price["Amount"]) * item_quantity) - float(item_discount["Amount"])
         )
 
-    item_obj.amount = _amount #TODO Отменённые заказы имеют quantity 0 при этом стоимость item и TotalOrder могут меть значения. проблема в подсчёте amount
-    item_obj.engraving_info = item["Title"]  # TODO На перспективу
+    item_obj.amount = _amount
+    item_obj.engraving_info = item["Title"]  # TODO СДЕЛАТЬ!!!!
 
 
 def _format_client(*,
                    order: dict,
                    client_obj: Client):
     client_obj.email = order.get("BuyerInfo", {}).get("BuyerEmail")
-
 
 def _format_city(*,
                  order: dict,
@@ -81,7 +80,6 @@ def format_order_data(*,
 
         order_obj.quantity += item_quantity
 
-        # TODO Отменённые заказы имеют quantity 0 при этом стоимость item и TotalOrder могут меть значения. проблема в подсчёте amount
         _amount_tax = 0.0
         if item_tax and item_discount_tax and item_quantity:
             _amount_tax += (

@@ -49,7 +49,7 @@ def process_single_shop(shop: ShopData):
 
 		uploading_orders.orders_data.extend(orders_data)
 
-		with open("test_data.json", "w") as f:
+		with open("test_data_2.json", "w") as f:
 			json.dump(uploading_orders.model_dump(), f)
 
 		offset += 100

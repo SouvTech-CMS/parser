@@ -6,7 +6,9 @@ from configs import settings
 
 
 def update_parser_status_by_id(
-        parser_id: int, status: int, last_parsed: float | None = None
+        parser_id: int,
+        status: int,
+        last_parsed: float | None = None
 ):
     data = {
         "id": parser_id,

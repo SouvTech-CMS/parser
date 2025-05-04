@@ -41,7 +41,7 @@ class OrderStatus:
             "PendingAvailability": cls.Paid,
             "PartiallyShipped": cls.Completed,
             "Shipped": cls.Completed,
-            "InvoiceUnconfirmed": cls.Completed,
+            "InvoiceUnconfirmed": cls.Paid,
             "Canceled": cls.Canceled,
             "Unfulfillable": cls.Canceled
         }
