@@ -15,7 +15,7 @@ from log.logger import logger
 
 def process_single_shop(shop: ShopData):
     order_cl = OrderClient(shop=shop)
-    created_after = LAST_WEEK_DATE
+    created_after = EARLIEST_DATE
     shop_error = False
     offset = 0
     start_time_shop = datetime.now()

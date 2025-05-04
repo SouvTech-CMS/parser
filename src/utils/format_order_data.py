@@ -18,9 +18,6 @@ def _format_order(*,
     order_obj.tax = 0
 
 
-    #TODO на бэке сделать ручку под amazon
-
-
 def _format_good_in_order(*,
                           item: dict,
                           item_obj: GoodInOrder):

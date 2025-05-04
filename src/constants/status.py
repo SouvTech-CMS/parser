@@ -5,7 +5,6 @@ class ParserStatus:
     ETSY_API_ERROR = 3
 
 
-
 class OrderStatus:
     Paid = "Paid"
     Canceled = "Canceled"
@@ -15,8 +14,6 @@ class OrderStatus:
 
     @classmethod
     def get_backend_status(cls, amazon_status):
-
-        #TODO amazon не предоставлыет доступ к инфе о refund, с одним но
 
         """
         PendingAvailability — Available only for pre-orders. The order has been placed, but the payment has not been authorized, and the release date of the product is in the future.

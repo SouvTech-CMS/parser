@@ -20,7 +20,9 @@ def update_parser_status_by_id(
 
     try:
         response = req.put(
-            f"{settings.API_URL}/parser/", headers=authorization().model_dump(), json=data
+            url=settings.PARSER_STATUS_URL,
+            headers=authorization().model_dump(),
+            json=data
         )
 
         if response.status_code != 200:

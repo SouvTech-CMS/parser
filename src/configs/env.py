@@ -20,5 +20,9 @@ class Settings(BaseSettings):
 
 
     @property
-    def PARSER_ORDER_UPLOAD(self):
-        return f"{self.API_URL}/parser/orders/upload/"
+    def PARSER_ORDER_UPLOAD_URL(self):
+        return f"{self.API_URL}/parser/orders/upload/amazon"
+
+    @property
+    def PARSER_STATUS_URL(self):
+        return f"{self.API_URL}/parser/"
