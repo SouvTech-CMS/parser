@@ -1,31 +1,41 @@
 import requests as req
-from loguru import logger as log
+from log.logger import logger
 
 from api.auth import authorization
-from configs.env import API_URL
+from configs import settings
 
 
 def update_parser_status_by_id(
-    parser_id: int, status: int, last_parsed: float | None = None
+        parser_id: int,
+        status: int,
+        last_parsed: float | None = None
 ):
     data = {
         "id": parser_id,
         "status": status,
     }
+
     if last_parsed:
         data.update({"last_parsed": last_parsed})
+
     try:
         response = req.put(
-            f"{API_URL}/parser/", headers=authorization().model_dump(), json=data
+            url=settings.PARSER_STATUS_URL,
+            headers=authorization().model_dump(),
+            json=data
+        )
+
+        if response.status_code != 200:
+            raise ValueError(f"Unexpected status code: {response.status_code}")
+
+    except ValueError:
+        logger.error(
+            f"""
+                Some error when updating parser status.
+                Parser ID: {parser_id}
+                Status code: {response.status_code}
+                Details: {response.json()['detail']}
+            """
         )
     except Exception as e:
-        return update_parser_status_by_id(parser_id, status)
-    if response.status_code != 200:
-        log.error(
-            f"""
-            Some error when updating parser status.
-            Parser ID: {parser_id}
-            Status code: {response.status_code}
-            Details: {response.json()['detail']}
-        """
-        )
+        logger.error(f"Some wrong with parser status updating = {e}")

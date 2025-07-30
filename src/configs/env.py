@@ -1,18 +1,28 @@
-import os
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from dotenv import load_dotenv
 
-load_dotenv()
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env")
 
-ETSY_API_KEY = os.getenv('ETSY_API_KEY')
-ETSY_API_SHARED_SECRET = os.getenv('ETSY_API_SHARED_SECRET')
+    LWA_APP_ID: str
+    LWA_CLIENT_SECRET: str
+    SP_API_REFRESH_TOKEN: str
 
-ETSY_API_REDIRECT_URL = os.getenv('ETSY_API_REDIRECT_URL')
+    API_URL: str
+    API_AUTH_TOKEN: str
 
-CODE_VERIFIER = os.getenv('CODE_VERIFIER')
+    LOG_FILE: str
+    DATA_FOLDER_PATH: str
 
-API_URL = os.getenv('API_URL')
-API_AUTH_TOKEN = os.getenv("API_AUTH_TOKEN")
+    @property
+    def SHOPS_DATA_FILE_PATH(self):
+        return f"{self.DATA_FOLDER_PATH}/shops/shops_amazon.json"
 
-DATA_FOLDER_PATH = os.getenv('DATA_FOLDER_PATH')
-LOG_FILE = os.getenv("LOG_FILE")
+
+    @property
+    def PARSER_ORDER_UPLOAD_URL(self):
+        return f"{self.API_URL}/parser/orders/upload/amazon"
+
+    @property
+    def PARSER_STATUS_URL(self):
+        return f"{self.API_URL}/parser/"
