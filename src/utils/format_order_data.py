@@ -49,7 +49,7 @@ def format_order_data(
         client = Client(
             user_marketplace_id=str(order["buyer_user_id"]),
             name=order["name"],
-            email=order["buyer_email"]
+            email=order["buyer_email"],
         )
     except Exception:
         pass

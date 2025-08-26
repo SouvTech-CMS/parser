@@ -13,3 +13,5 @@ venv/
 
 # Data Folder
 /data/
+
+*.json
