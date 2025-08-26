@@ -1,0 +1,11 @@
+services:
+  parser:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command: python3 /app/src/parser.py
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
