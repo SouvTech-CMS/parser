@@ -6,10 +6,13 @@ from configs.env import API_URL
 
 
 def update_parser_status_by_id(
-    parser_id: int,
-    status: int,
-    last_parsed: float | None = None,
+        parser_id: int,
+        status: int,
+        last_parsed: float | None = None,
 ):
+    log.info(
+        f"Updating parser {parser_id} status to {status}..."
+    )
     data = {
         "id": parser_id,
         "status": status,
@@ -34,3 +37,5 @@ def update_parser_status_by_id(
             Details: {response.json()['detail']}
             """
         )
+    else:
+        log.success(f"Parser {parser_id} status updated.")

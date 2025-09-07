@@ -9,8 +9,8 @@ from api.order import upload_orders_data
 from api.parser import update_parser_status_by_id
 from configs.env import LOG_FILE
 from constants.status import ParserStatus
-from etsy_api.get_etsy_api import get_etsy_api
 from etsy_api.orders import get_all_orders_by_shop_id
+from schemes.shop_data import ShopData
 from schemes.upload_order import UploadingOrderData, OrderData
 from utils.format_order_data import format_order_data
 from utils.parser_shops_data import get_parser_shops_data
@@ -24,30 +24,43 @@ log.add(
     serialize=True,
 )
 
-# Every 30 minutes
-PARSER_WAIT_TIME_IN_SECONDS = 60 * 30
+# Every minute
+PARSER_WAIT_TIME_IN_SECONDS = 60 * 1
+ORDERS_PER_REQUEST = 10
+ORDERS_PER_REQUEST_PER_MONTH = 100
+DEFAULT_OFFSET = 9
 
 
-def process_single_shop(shop):
-    now_hour = datetime.now().hour
+class ShopError(Exception):
+    parser_id: int
 
-    shop_error = False
 
-    start_time_shop = datetime.now()
-    log.info(f"Parsing shop {shop.shop_id} - {shop.shop_name}...")
-    log.info(f"Updating parser {shop.parser_id} status to {ParserStatus.PARSING}...")
-    update_parser_status_by_id(
-        parser_id=shop.parser_id,
-        status=ParserStatus.PARSING,
-    )
+class BackendError(Exception):
+    pass
 
-    log.success(f"Parser status updated.")
 
+def upload_order_data_to_backend(shop: ShopData, uploading_data: UploadingOrderData):
+    number_of_attempts = 0
+    while number_of_attempts < 10:
+        res = upload_orders_data(uploading_data)
+        if res:
+            break
+        number_of_attempts += 1
+    if number_of_attempts == 10:
+        log.critical(f"Some error on sending info to backend")
+        update_parser_status_by_id(
+            parser_id=shop.parser_id,
+            status=ParserStatus.ETSY_API_ERROR,
+        )
+        raise BackendError
+
+
+def parse_per_month(shop: ShopData):
+    log.info("Getting orders per month")
     # Initializing constants
     that_month = True
     offset = 0
     date = datetime.now() - timedelta(days=30)
-    weekday = datetime.now().weekday()
     ##########################
 
     while that_month:
@@ -64,15 +77,7 @@ def process_single_shop(shop):
                 offset=offset,
             )
         except Exception as e:
-            log.critical(f"Some error in getting info from ETSY API: {e}")
-            pprint.pprint(e)
-            update_parser_status_by_id(
-                parser_id=shop.parser_id,
-                status=ParserStatus.ETSY_API_ERROR,
-            )
-            shop_error = True
-            break
-
+            raise ShopError
         # Get order details and split for creating and updating
         for shop_order in shop_orders:
 
@@ -91,53 +96,87 @@ def process_single_shop(shop):
                     order_items=goods_in_order,
                 )
             )
-        number_of_attempts = 0
-        while number_of_attempts < 10:
-            res = upload_orders_data(uploading_orders)
-            if res:
-                break
-            number_of_attempts += 1
-        if number_of_attempts == 10:
-            log.critical(f"Some error on sending info to backend")
-            update_parser_status_by_id(
-                parser_id=shop.parser_id,
-                status=ParserStatus.ETSY_API_ERROR,
-            )
-            shop_error = True
-            break
-
+        upload_order_data_to_backend(shop, uploading_orders)
         offset += 100
 
-        if offset > 200:
-            if now_hour == 20 and weekday in (5, 6):
-                continue
-            break
 
-    if shop_error:
+def process_single_shop(shop):
+    try:
+        now = datetime.now()
+
+        start_time_shop = datetime.now()
+        log.info(f"Parsing shop {shop.shop_id} - {shop.shop_name}...")
+        update_parser_status_by_id(
+            parser_id=shop.parser_id,
+            status=ParserStatus.PARSING,
+        )
+
+        # Initializing constants
+        weekday = datetime.now().weekday()
+        ##########################
+
+        uploading_orders = UploadingOrderData(shop_id=shop.shop_id, orders_data=[])
+
+        log.info(
+            f"Fetching {ORDERS_PER_REQUEST} orders from shop {shop.shop_name}..."
+        )
+
+        try:
+            shop_orders, _ = get_all_orders_by_shop_id(
+                etsy_shop_id=int(shop.etsy_shop_id),
+                shop_id=shop.shop_id,
+                limit=ORDERS_PER_REQUEST,
+                offset=DEFAULT_OFFSET,
+            )
+        except Exception as e:
+            raise ShopError(e)
+
+        # Get order details and split for creating and updating
+        for shop_order in shop_orders:
+            order, goods_in_order, day, month, client, city = format_order_data(
+                order=shop_order,
+            )
+            uploading_orders.orders_data.append(
+                OrderData(
+                    order=order,
+                    client=client,
+                    city=city,
+                    order_items=goods_in_order,
+                )
+            )
+        upload_order_data_to_backend(shop, uploading_orders)
+        if now.hour == 19 and now.minute < 3 and weekday in (5, 6):
+            parse_per_month(shop)
+
+        update_parser_status_by_id(
+            parser_id=shop.parser_id,
+            status=ParserStatus.OK_AND_WAIT,
+            last_parsed=datetime.now().timestamp(),
+        )
+
+        log.success(f"Shop {shop.shop_id} - {shop.shop_name} parsed.")
+        log.info(
+            f"Shop  {shop.shop_id} - {shop.shop_name} parsing time: {datetime.now() - start_time_shop}"
+        )
+    except ShopError as e:
+        log.critical(f"Some error in getting info from ETSY API: {e}")
+        pprint.pprint(e)
         log.error(f"Shop {shop.shop_id} - {shop.shop_name} parsed with error.")
-        return
-    log.info(
-        f"Updating parser {shop.parser_id} status to {ParserStatus.OK_AND_WAIT}..."
-    )
+        update_parser_status_by_id(
+            parser_id=shop.parser_id,
+            status=ParserStatus.ETSY_API_ERROR,
+        )
+    except BackendError as ex:
+        log.critical(f"Some error on backend requests, parser: {shop.parser_id}")
+        pprint.pprint(ex)
 
-    update_parser_status_by_id(
-        parser_id=shop.parser_id,
-        status=ParserStatus.OK_AND_WAIT,
-        last_parsed=datetime.now().timestamp(),
-    )
-
-    log.success(f"Parser status updated.")
-    log.success(f"Shop {shop.shop_id} - {shop.shop_name} parsed.")
-    end_time_shop = datetime.now()
-    log.info(
-        f"Shop  {shop.shop_id} - {shop.shop_name} parsing time: {end_time_shop - start_time_shop}"
-    )
+    except Exception as ex:
+        log.critical(ex)
+        pprint.pprint(ex)
 
 
 def etsy_api_parser():
     shops_data = get_parser_shops_data()
-    # for shop in shops_data:
-    #     etsy_api = get_etsy_api(shop.shop_id)
     # Используем ThreadPoolExecutor для параллельной обработки
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         # Запускаем обработку каждого магазина в отдельном потоке
