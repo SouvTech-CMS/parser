@@ -11,7 +11,7 @@ from configs.env import LOG_FILE
 from constants.status import ParserStatus
 from etsy_api.orders import get_all_orders_by_shop_id
 from schemes.shop_data import ShopData
-from schemes.upload_order import UploadingOrderData, OrderData
+from schemes.upload_order import OrderData, UploadingOrderData
 from utils.format_order_data import format_order_data
 from utils.parser_shops_data import get_parser_shops_data
 
@@ -28,7 +28,7 @@ log.add(
 PARSER_WAIT_TIME_IN_SECONDS = 60 * 1
 ORDERS_PER_REQUEST = 10
 ORDERS_PER_REQUEST_PER_MONTH = 100
-DEFAULT_OFFSET = 9
+DEFAULT_OFFSET = 0
 
 
 class ShopError(Exception):
@@ -117,9 +117,7 @@ def process_single_shop(shop):
 
         uploading_orders = UploadingOrderData(shop_id=shop.shop_id, orders_data=[])
 
-        log.info(
-            f"Fetching {ORDERS_PER_REQUEST} orders from shop {shop.shop_name}..."
-        )
+        log.info(f"Fetching {ORDERS_PER_REQUEST} orders from shop {shop.shop_name}...")
 
         try:
             shop_orders, _ = get_all_orders_by_shop_id(
