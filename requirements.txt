@@ -3,7 +3,7 @@ python-dotenv~=1.0.1
 pydantic~=2.5.3
 schedule~=1.2.1
 requests~=2.31.0
-etsyv3~=0.0.6
+etsyv3~=0.0.7
 fastapi~=0.110.1
 uvicorn[standard]~=0.29.0
 cryptography
