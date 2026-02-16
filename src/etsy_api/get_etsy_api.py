@@ -12,6 +12,7 @@ from constants.files_paths import SHOPS_DATA_FILE_PATH
 from schemes.access_token import AuthToken
 from schemes.auth import AuthCode
 from schemes.shop_data import ShopData
+from utils.json_file_handler import read_json, write_json
 
 AUTH_CODE_WAIT_TIME_IN_SECONDS = 60
 AUTH_TOKEN_LIFE_TIME_IN_SECONDS = 3600
@@ -57,23 +58,22 @@ class SouvTechEtsyAPI(EtsyAPI):
 
 
 def _get_shop_data_by_id(shop_id: int) -> ShopData:
-    with open(SHOPS_DATA_FILE_PATH) as f:
-        shops_data = [ShopData(**shop) for shop in json.load(f)]
+    shops_data_raw = read_json(SHOPS_DATA_FILE_PATH)
+    shops_data = [ShopData(**shop) for shop in shops_data_raw]
     for shop in shops_data:
         if shop.shop_id == shop_id:
             return shop
 
 
 def _save_auth_token(auth_token: AuthToken, shop_id: int):
-    with open(SHOPS_DATA_FILE_PATH) as f:
-        shops_data = [ShopData(**shop_data) for shop_data in json.load(f)]
+    shops_data_raw = read_json(SHOPS_DATA_FILE_PATH)
+    shops_data = [ShopData(**shop_data) for shop_data in shops_data_raw]
     for shop in shops_data:
         if shop.shop_id == shop_id:
             shop.shop_token = auth_token.access_token
             shop.shop_refresh_token = auth_token.refresh_token
             shop.expiry = auth_token.expires_at
-    with open(SHOPS_DATA_FILE_PATH, "w") as f:
-        json.dump([shop_data.model_dump() for shop_data in shops_data], f)
+    write_json(SHOPS_DATA_FILE_PATH, [shop_data.model_dump() for shop_data in shops_data])
 
 
 def _get_auth_code(

@@ -8,6 +8,7 @@ from loguru import logger as log
 
 from api.order import upload_orders_data
 from api.parser import update_parser_status_by_id
+from utils.json_file_handler import write_json
 from configs.env import LOG_FILE
 from constants.status import ParserStatus
 from etsy_api.orders import get_all_orders_by_shop_id
@@ -93,8 +94,7 @@ def process_single_shop(shop):
 			)
 
 		# res = upload_orders_data(uploading_orders)
-		with open("test_data.json", "w") as f:
-			json.dump(uploading_orders.model_dump(), f)
+		write_json("test_data.json", uploading_orders.model_dump())
 
 		return
 
