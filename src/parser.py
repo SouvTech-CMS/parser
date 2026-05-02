@@ -9,6 +9,7 @@ from api.order import upload_orders_data
 from api.parser import update_parser_status_by_id
 from configs.env import LOG_FILE
 from constants.status import ParserStatus
+from etsy_api.get_etsy_api import get_etsy_api
 from etsy_api.orders import get_all_orders_by_shop_id
 from schemes.shop_data import ShopData
 from schemes.upload_order import OrderData, UploadingOrderData
@@ -174,8 +175,9 @@ def process_single_shop(shop):
         pprint.pprint(ex)
 
 
-def etsy_api_parser():
-    shops_data = get_parser_shops_data()
+def etsy_api_parser(shops_data: list[ShopData] | None = None):
+    if shops_data is None:
+        shops_data = get_parser_shops_data()
     # Используем ThreadPoolExecutor для параллельной обработки
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         # Запускаем обработку каждого магазина в отдельном потоке
@@ -189,12 +191,29 @@ def etsy_api_parser():
     log.success(f"Parsed all shops waiting {PARSER_WAIT_TIME_IN_SECONDS} to repeat")
 
 
+def warm_up_etsy_authorization(shops_data: list[ShopData]):
+    log.info("Start Etsy API warm up before parser loop")
+    for shop in shops_data:
+        try:
+            log.info(f"Warm up auth for shop {shop.shop_id} - {shop.shop_name}")
+            etsy_api = get_etsy_api(shop_id=shop.shop_id)
+            etsy_api.ping()
+            log.success(f"Warm up auth success for shop {shop.shop_id} - {shop.shop_name}")
+        except Exception as ex:
+            log.error(
+                f"Warm up auth failed for shop {shop.shop_id} - {shop.shop_name}: {ex}"
+            )
+
+
 # TODO: сделать чтобы файлы с кредами не писались в файл в многопотоке
 
 if __name__ == "__main__":
+    shops_data = get_parser_shops_data()
+    warm_up_etsy_authorization(shops_data)
+
     while True:
         try:
-            etsy_api_parser()
+            etsy_api_parser(shops_data=shops_data)
             time.sleep(PARSER_WAIT_TIME_IN_SECONDS)
         except Exception as e:
             log.error(f"Error on fetching orders {e}")
