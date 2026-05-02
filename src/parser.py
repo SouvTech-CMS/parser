@@ -17,11 +17,12 @@ from utils.parser_shops_data import get_parser_shops_data
 
 log.add(
     LOG_FILE,
-    format="{time} {level} {message}",
+    format="{time} {level} {thread.name} {message}",
     level="DEBUG",
     rotation="100 MB",
     compression="zip",
     serialize=True,
+    enqueue=True,
 )
 
 # Every minute
