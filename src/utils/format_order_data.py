@@ -1,3 +1,4 @@
+import contextlib
 import json
 from datetime import datetime
 
@@ -9,19 +10,13 @@ from schemes.order_item import GoodInOrder
 
 def format_order_data(
     order: dict,
-):
+) -> tuple[Order, list[GoodInOrder], Client, City]:
     order_id = order["receipt_id"]
     # Good in orders
     order_items = []
     order_created_at = datetime.fromtimestamp(order["created_timestamp"])
     ###########
-    day = order_created_at.day
-    month = order_created_at.month
-    year = order_created_at.year
-    ###########
     order_status = order["status"]
-    # Order date
-    formated_date = f"{day}.{month}.{year}"
     # Full quantity of items in order
     full_items_quantity = 0
 
@@ -35,24 +30,20 @@ def format_order_data(
 
     # Getting order city and state ordered from
     city = City()
-    try:
+    with contextlib.suppress(Exception):
         city = City(
             name=order["city"],
             state=order["state"],
             country=order["country_iso"],
         )
-    except Exception:
-        pass
     # Getting client info
     client = Client()
-    try:
+    with contextlib.suppress(Exception):
         client = Client(
             user_marketplace_id=str(order["buyer_user_id"]),
             name=order["name"],
             email=order["buyer_email"],
         )
-    except Exception:
-        pass
     # Creating goods and good in order objects
     for trans in order["transactions"]:
         # Quantity of item
@@ -102,10 +93,16 @@ def format_order_data(
     buyer_paid = order_total["amount"] / order_total["divisor"]
     tax_total = order["total_tax_cost"]
     tax_amount = tax_total["amount"] / tax_total["divisor"]
+
+    shipping = (
+        order["total_shipping_cost"]["amount"] / order["total_shipping_cost"]["divisor"]
+    )
+
     order = Order(
         status=order_status,
         order_id=str(order_id),
-        date=formated_date,
+        date=order_created_at,
+        shipping=shipping,
         quantity=full_items_quantity,
         buyer_paid=buyer_paid,
         tax=tax_amount,
@@ -113,4 +110,4 @@ def format_order_data(
         tracking_code=tracking_code,
     )
 
-    return order, order_items, day, month, client, city
+    return order, order_items, client, city

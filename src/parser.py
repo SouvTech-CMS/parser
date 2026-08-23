@@ -1,5 +1,4 @@
 import concurrent.futures
-import pprint
 import time
 from datetime import datetime, timedelta
 
@@ -49,7 +48,7 @@ def upload_order_data_to_backend(shop: ShopData, uploading_data: UploadingOrderD
             break
         number_of_attempts += 1
     if number_of_attempts == 10:
-        log.critical(f"Some error on sending info to backend")
+        log.critical("Some error on sending info to backend")
         update_parser_status_by_id(
             parser_id=shop.parser_id,
             status=ParserStatus.ETSY_API_ERROR,
@@ -78,15 +77,14 @@ def parse_per_month(shop: ShopData):
                 limit=100,
                 offset=offset,
             )
-        except Exception as e:
-            raise ShopError
+        except Exception as ex:
+            raise ShopError(ex)
         # Get order details and split for creating and updating
         for shop_order in shop_orders:
-
-            order, goods_in_order, day, month, client, city = format_order_data(
+            order, goods_in_order, client, city = format_order_data(
                 order=shop_order,
             )
-            if day <= date.day and month == date.month:
+            if order.date.day <= date.day and order.date.month == date.month:
                 that_month = False
                 break
 
@@ -102,7 +100,7 @@ def parse_per_month(shop: ShopData):
         offset += 100
 
 
-def process_single_shop(shop):
+def process_single_shop(shop: ShopData):
     try:
         now = datetime.now()
 
@@ -133,7 +131,7 @@ def process_single_shop(shop):
 
         # Get order details and split for creating and updating
         for shop_order in shop_orders:
-            order, goods_in_order, day, month, client, city = format_order_data(
+            order, goods_in_order, client, city = format_order_data(
                 order=shop_order,
             )
             uploading_orders.orders_data.append(
@@ -160,7 +158,6 @@ def process_single_shop(shop):
         )
     except ShopError as e:
         log.critical(f"Some error in getting info from ETSY API: {e}")
-        pprint.pprint(e)
         log.error(f"Shop {shop.shop_id} - {shop.shop_name} parsed with error.")
         update_parser_status_by_id(
             parser_id=shop.parser_id,
@@ -168,11 +165,9 @@ def process_single_shop(shop):
         )
     except BackendError as ex:
         log.critical(f"Some error on backend requests, parser: {shop.parser_id}")
-        pprint.pprint(ex)
 
     except Exception as ex:
         log.critical(ex)
-        pprint.pprint(ex)
 
 
 def etsy_api_parser(shops_data: list[ShopData] | None = None):
@@ -198,14 +193,14 @@ def warm_up_etsy_authorization(shops_data: list[ShopData]):
             log.info(f"Warm up auth for shop {shop.shop_id} - {shop.shop_name}")
             etsy_api = get_etsy_api(shop_id=shop.shop_id)
             etsy_api.ping()
-            log.success(f"Warm up auth success for shop {shop.shop_id} - {shop.shop_name}")
+            log.success(
+                f"Warm up auth success for shop {shop.shop_id} - {shop.shop_name}"
+            )
         except Exception as ex:
             log.error(
                 f"Warm up auth failed for shop {shop.shop_id} - {shop.shop_name}: {ex}"
             )
 
-
-# TODO: сделать чтобы файлы с кредами не писались в файл в многопотоке
 
 if __name__ == "__main__":
     shops_data = get_parser_shops_data()

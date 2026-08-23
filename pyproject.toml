@@ -1,0 +1,62 @@
+[project]
+name = "parser"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "cryptography>=47.0.0",
+    "datetime~=5.5",
+    "etsyv3~=0.0.7",
+    "fastapi~=0.110.1",
+    "loguru~=0.7.2",
+    "pydantic~=2.5.3",
+    "python-dotenv~=1.0.1",
+    "requests~=2.31.0",
+    "schedule~=1.2.1",
+    "selenium~=4.19.0",
+    "uvicorn[standard]~=0.29.0",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort (import sorting)
+    "N",   # pep8-naming
+    "B",   # bugbear
+    "UP",  # pyupgrade (modern python syntax)
+    "SIM", # simplify
+    "RUF", # ruff-specific rules
+    "T20", # no print/pprint
+    "ERA", # commented out code
+    "PTH", # pathlib instead of os.path
+    "RET", # return statements
+    "C90", # cyclomatic complexity
+    "A",   # builtin shadowing
+    "COM", # trailing commas
+    "ARG", # unused arguments
+]
+ignore = [
+    "E501",  # line too long (handled by formatter)
+    "COM812", # missing trailing comma (conflicts with formatter)
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
