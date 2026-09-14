@@ -17,6 +17,17 @@ them to the backend. Only Etsy is implemented and used (Amazon/Ebay parsing does
 - Don't shorten the 60s cycle or add per-order Etsy requests without checking API quota
 - No new dependencies without approval
 
+## Keep the docs current
+
+- Before changing the loop, payload or auth flow, read the matching `agent-docs/` file; if
+  the doc contradicts the code, fix the doc in the same PR
+- When a change alters the cycle, constants, statuses, payload fields, env keys or servers
+  described in `agent-docs/`, update the affected file(s) in the same branch
+  (separate `docs:` commit); backend-side handling is described in
+  `../backend/agent-docs/domain-orders.md` - keep both sides consistent
+- Keep files short: extend the matching file instead of creating new ones, register new
+  files in `agent-docs/README.md`
+
 ## Tech & workflow
 
 - Python 3.11, `requests`, `etsyv3`, `loguru`, `pydantic`; deps in `requirements.txt`
