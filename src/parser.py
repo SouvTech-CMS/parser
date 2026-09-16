@@ -28,7 +28,10 @@ log.add(
 
 # Every minute
 PARSER_WAIT_TIME_IN_SECONDS = 60 * 1
-ORDERS_PER_REQUEST = 10
+# NOTE: backend skips already existing orders, so this window also works as
+# re-sending of orders that failed to upload earlier (~3-4 days for big shops).
+# Don't raise it much: it's N orders per shop every minute for the backend
+ORDERS_PER_REQUEST = 50
 ORDERS_PER_REQUEST_PER_MONTH = 100
 DEFAULT_OFFSET = 0
 
