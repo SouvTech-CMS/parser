@@ -3,9 +3,9 @@
 ## Магазины и где крутится парсер
 | `shop_id` в CMS | Магазин | Где парсер |
 |---|---|---|
-| 1 | NikoEngraving | «helsinki» `193.233.23.56`, `/root/parser`, контейнер `parser-parser-1` (`sshc helsinki`) |
+| 1 | NikoEngraving | «helsinki» `193.233.23.56`, `/root/parser`, контейнер `parser-parser-1` (`ssh root@193.233.23.56`) |
 | 2 | AldaProduction | там же |
-| 3 | DaDaTeamEngraving | прод `31.172.69.164`, `/home/souvtech/parser`, контейнер `souvtech-parser-1` (`sshc souvtech`) |
+| 3 | DaDaTeamEngraving | прод `31.172.69.164`, `/home/souvtech/parser`, контейнер `souvtech-parser-1` (`ssh souvtech@31.172.69.164`) |
 | 4 | ElmaVadaStudio | там же |
 | 5, 6 | Ebay, Amazon | парсера нет, магазины заведены только для склада |
 
