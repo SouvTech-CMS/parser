@@ -32,7 +32,8 @@ them to the backend. Only Etsy is implemented and used (Amazon/Ebay parsing does
 
 - Python 3.11, `requests`, `etsyv3`, `loguru`, `pydantic`; deps in `requirements.txt`
 - Runs in Docker (`docker-compose.yml`, `python3 /app/src/parser.py`), `src/` and `data/` are
-  bind-mounted, so deploy = `git pull` + restart on the server (no CI workflow)
+  bind-mounted. No CI: deploy by hand on both servers (`docker compose down` -> `git pull` ->
+  `docker compose up -d`), procedure in `../backend/agent-docs/deploy-and-servers.md`
 - Branch `main` is production; feature branches with semantic names, PR into `main`
 - Conventional Commits: `feat:`, `fix:`, `refactor:`, `chore:`, `docs:`
 

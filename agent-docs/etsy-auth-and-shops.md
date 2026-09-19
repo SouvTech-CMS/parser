@@ -3,13 +3,14 @@
 ## Магазины и где крутится парсер
 | `shop_id` в CMS | Магазин | Где парсер |
 |---|---|---|
-| 1 | NikoEngraving | Второй хост (в разное время — ноутбук клиента в Лос-Анджелесе); уточнять перед работой |
+| 1 | NikoEngraving | «helsinki» `193.233.23.56`, `/root/parser`, контейнер `parser-parser-1` (`sshc helsinki`) |
 | 2 | AldaProduction | там же |
-| 3 | DaDaTeamEngraving | `31.172.69.164`, контейнер `souvtech-parser-1` |
+| 3 | DaDaTeamEngraving | прод `31.172.69.164`, `/home/souvtech/parser`, контейнер `souvtech-parser-1` (`sshc souvtech`) |
 | 4 | ElmaVadaStudio | там же |
 | 5, 6 | Ebay, Amazon | парсера нет, магазины заведены только для склада |
 
-Конфиги магазинов по серверам лежат в корне воркспейса: `parsers-config-dada-elma.json`,
+Как обновлять парсеры на серверах — `backend/agent-docs/deploy-and-servers.md`, раздел
+«Деплой parser». Конфиги магазинов по серверам лежат в корне воркспейса: `parsers-config-dada-elma.json`,
 `parsers-config-niko-alda.json` (формат `data/shops/shops.json`). Один процесс парсера
 обслуживает магазины из своего `shops.json`; `parser_id` там = id записи в таблице `parser` CMS.
 
