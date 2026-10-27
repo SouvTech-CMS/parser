@@ -1,6 +1,7 @@
 from etsyv3.util.auth.auth_helper import AuthHelper
 
 from configs.env import ETSY_API_KEY, ETSY_API_REDIRECT_URL, CODE_VERIFIER
+from etsy_api.request_timeout import set_etsy_request_timeout
 
 ETSY_OAUTH_CONNECT_URL = "https://www.etsy.com/oauth/connect"
 ETSY_OAUTH_TOKEN_URL = "https://api.etsy.com/v3/public/oauth/token"
@@ -25,3 +26,5 @@ etsy_auth = AuthHelper(
     code_verifier=CODE_VERIFIER,
     state=STATE,
 )
+# NOTE: OAuth2Session is a requests.Session, used for auth code -> token exchange
+set_etsy_request_timeout(etsy_auth.oauth)
