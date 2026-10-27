@@ -9,6 +9,7 @@ from typing_extensions import deprecated
 from configs.env import ETSY_API_KEY
 from constants.etsy_oauth import STATE, etsy_auth
 from constants.files_paths import SHOPS_DATA_FILE_PATH
+from etsy_api.request_timeout import set_etsy_request_timeout
 from schemes.access_token import AuthToken
 from schemes.auth import AuthCode
 from schemes.shop_data import ShopData
@@ -20,6 +21,11 @@ AUTH_TOKEN_LIFE_TIME_IN_SECONDS = 3600
 
 class SouvTechEtsyAPI(EtsyAPI):
     shop_id: int
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # NOTE: covers all etsyv3 methods and custom refresh() below
+        set_etsy_request_timeout(self.session)
 
     def refresh(self) -> tuple[str, str, datetime]:
         log.info(f"Custom refreshing Etsy access token..")

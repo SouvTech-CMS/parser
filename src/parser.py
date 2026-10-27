@@ -8,6 +8,7 @@ from loguru import logger as log
 from api.order import upload_orders_data
 from api.parser import update_parser_status_by_id
 from configs.env import LOG_FILE
+from constants.backend import BACKEND_RETRY_DELAY_IN_SECONDS, UPLOAD_ORDERS_ATTEMPTS
 from constants.status import ParserStatus
 from etsy_api.get_etsy_api import get_etsy_api
 from etsy_api.orders import get_all_orders_by_shop_id
@@ -45,13 +46,15 @@ class BackendError(Exception):
 
 
 def upload_order_data_to_backend(shop: ShopData, uploading_data: UploadingOrderData):
-    number_of_attempts = 0
-    while number_of_attempts < 10:
-        res = upload_orders_data(uploading_data)
-        if res:
-            break
-        number_of_attempts += 1
-    if number_of_attempts == 10:
+    for attempt in range(1, UPLOAD_ORDERS_ATTEMPTS + 1):
+        if upload_orders_data(uploading_data):
+            return
+        log.warning(
+            f"Uploading orders to backend failed (attempt {attempt}/{UPLOAD_ORDERS_ATTEMPTS})"
+        )
+        if attempt < UPLOAD_ORDERS_ATTEMPTS:
+            time.sleep(BACKEND_RETRY_DELAY_IN_SECONDS)
+    else:
         log.critical(f"Some error on sending info to backend")
         update_parser_status_by_id(
             parser_id=shop.parser_id,

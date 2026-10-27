@@ -30,6 +30,9 @@
   в `shops.json` не появится `shop_auth_code`. Код после согласия прилетает на
   `ETSY_API_REDIRECT_URL` (webhook на pipedream) и вставляется в файл руками.
   `src/auth_code_endpoint.py` для этого не работает (сломанный импорт).
+- На сессию `SouvTechEtsyAPI` и на OAuth-сессию `etsy_auth` смонтирован
+  `TimeoutHTTPAdapter` (`etsy_api/request_timeout.py`): etsyv3 сам таймаут не передаёт.
+  Новый клиент к Etsy создавай через `get_etsy_api()`, не голый `EtsyAPI`.
 - Scopes только на чтение. `code_verifier` и `state` — константы для всех магазинов.
 - `get_etsy_api()` вызывается на **каждый** запрос к Etsy и делает `time.sleep(3)` — это
   фактический ограничитель скорости.
